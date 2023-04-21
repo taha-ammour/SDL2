@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <SDL2/SDL_ttf.h>
 #include <stdbool.h>
+#include <SDL2/SDL_mixer.h>
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 500
@@ -42,7 +43,8 @@ int main(int argc, char *argv[])
         SDL_Quit();
         return 1;
     }
-
+    Mix_Init(MIX_INIT_MP3 | MIX_INIT_OGG);
+    Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
     SDL_Window *window = SDL_CreateWindow("Hangman", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
     if (!window)
     {
@@ -70,6 +72,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    Mix_Chunk* Clicksound = Mix_LoadWAV("res/sfx/Click.wav");
     int selected_item = MENU_START_GAME;
     enum Difficulty selected_options;
     selected_options = EASY;
@@ -101,6 +104,7 @@ int main(int argc, char *argv[])
                     {
                         selected_item = MENU_QUIT;
                     }
+                    Mix_PlayChannel(-1, Clicksound, 0);
                     break;
                 case SDLK_DOWN:
                     selected_item++;
@@ -108,6 +112,8 @@ int main(int argc, char *argv[])
                     {
                         selected_item = MENU_START_GAME;
                     }
+                    Mix_PlayChannel(-1, Clicksound, 0);
+                    
                     break;
                 case SDLK_RETURN:
                     switch (selected_item)
@@ -220,6 +226,9 @@ int main(int argc, char *argv[])
 
     // Clean up and exit
     SDL_RemoveTimer(timer_id);
+    Mix_FreeChunk(Clicksound);
+    Mix_CloseAudio();
+    Mix_Quit();
     TTF_CloseFont(font);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
