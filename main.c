@@ -19,6 +19,8 @@ enum Difficulty
     MED,
     HARD
 };
+//function intialisation
+Uint32 timer_callback(Uint32 interval, void *param);
 void draw_menu(SDL_Renderer *renderer, TTF_Font *font, int selected_item);
 void draw_txt(SDL_Renderer *renderer, TTF_Font *font, const char *timer_text, int x, int y);
 void draw_options(SDL_Renderer *renderer, TTF_Font *font, int selected_options);
