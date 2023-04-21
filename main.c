@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
     int selected_item = MENU_START_GAME;
     enum Difficulty selected_options;
     selected_options = EASY;
-    int counter = 1 * 10; // 5 minutes
+    int counter = 6 * 60; // 5 minutes
     SDL_TimerID timer_id = SDL_AddTimer(1000, timer_callback, &counter);
     SDL_Event event;
     bool quit = false;
@@ -160,13 +160,15 @@ int main(int argc, char *argv[])
                                         switch (selected_options)
                                         {
                                         case EASY:
-
+                                            counter = 6*60;
                                             break;
                                         case MED:
                                             // Start game with Medium difficulty
+                                            counter = 4*60;
                                             break;
                                         case HARD:
                                             // Start game with Hard difficulty
+                                            counter = 2*60;
                                             break;
                                         }
                                         break;
