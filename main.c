@@ -248,11 +248,21 @@ void draw_menu(SDL_Renderer *renderer, TTF_Font *font, int selected_item)
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 
+    text_surface = TTF_RenderText_Blended(font, "the Hangman Game", color);
+    text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
+    text_rect.x = 170;
+    text_rect.y = 50;
+    text_rect.w = text_surface->w;
+    text_rect.h = text_surface->h;
+    SDL_RenderCopy(renderer, text_texture, NULL, &text_rect);
+    SDL_FreeSurface(text_surface);
+    SDL_DestroyTexture(text_texture);
+
     // Draw the menu items with anti-aliasing
     text_surface = TTF_RenderText_Blended(font, "Start Game", (selected_item == MENU_START_GAME) ? color : (SDL_Color){128, 128, 128, 255});
     text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
-    text_rect.x = 50;
-    text_rect.y = 50;
+    text_rect.x = 250;
+    text_rect.y = 150;
     text_rect.w = text_surface->w;
     text_rect.h = text_surface->h;
     SDL_RenderCopy(renderer, text_texture, NULL, &text_rect);
@@ -261,8 +271,8 @@ void draw_menu(SDL_Renderer *renderer, TTF_Font *font, int selected_item)
 
     text_surface = TTF_RenderText_Blended(font, "Options", (selected_item == MENU_OPTIONS) ? color : (SDL_Color){128, 128, 128, 255});
     text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
-    text_rect.x = 50;
-    text_rect.y = 100;
+    text_rect.x = 290;
+    text_rect.y = 200;
     text_rect.w = text_surface->w;
     text_rect.h = text_surface->h;
     SDL_RenderCopy(renderer, text_texture, NULL, &text_rect);
@@ -271,8 +281,8 @@ void draw_menu(SDL_Renderer *renderer, TTF_Font *font, int selected_item)
 
     text_surface = TTF_RenderText_Blended(font, "Quit", (selected_item == MENU_QUIT) ? color : (SDL_Color){128, 128, 128, 255});
     text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
-    text_rect.x = 50;
-    text_rect.y = 150;
+    text_rect.x = 320;
+    text_rect.y = 250;
     text_rect.w = text_surface->w;
     text_rect.h = text_surface->h;
     SDL_RenderCopy(renderer, text_texture, NULL, &text_rect);
@@ -308,7 +318,7 @@ void draw_options(SDL_Renderer *renderer, TTF_Font *font, int selected_options)
     // Draw the options menu with anti-aliasing
     text_surface = TTF_RenderText_Blended(font, "Difficulty Level", color);
     text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
-    text_rect.x = 50;
+    text_rect.x = 230;
     text_rect.y = 50;
     text_rect.w = text_surface->w;
     text_rect.h = text_surface->h;
@@ -317,7 +327,7 @@ void draw_options(SDL_Renderer *renderer, TTF_Font *font, int selected_options)
     // Draw the difficulty levels
     char easy_text[32], med_text[32], hard_text[32];
     sprintf(easy_text, "Easy%s", (selected_options == EASY) ? " <--" : "");
-    sprintf(med_text, "Med%s", (selected_options == MED) ? " <--" : "");
+    sprintf(med_text, "Medium%s", (selected_options == MED) ? " <--" : "");
     sprintf(hard_text, "Hard%s", (selected_options == HARD) ? " <--" : "");
 
     text_surface = TTF_RenderText_Blended(font, easy_text, (selected_options == EASY) ? color : (SDL_Color){128, 128, 128, 255});
