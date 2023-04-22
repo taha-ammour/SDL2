@@ -340,14 +340,12 @@ void draw_txt(SDL_Renderer *renderer, TTF_Font *font, const char *text, int x, i
     SDL_Color color = {255, 255, 255, 255};
     SDL_Surface *surface = TTF_RenderText_Blended(font, text, color);
     SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_Rect text_rect = { x, y, 0, 0 };
+    SDL_Rect text_rect = {x, y, 0, 0};
     SDL_QueryTexture(texture, NULL, NULL, &text_rect.w, &text_rect.h);
     SDL_RenderCopy(renderer, texture, NULL, &text_rect);
     SDL_DestroyTexture(texture);
     SDL_FreeSurface(surface);
 }
-
-
 
 void draw_options(SDL_Renderer *renderer, TTF_Font *font38, int selected_options)
 {
