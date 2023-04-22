@@ -22,7 +22,7 @@ enum Difficulty
 
 //function intialisation
 Uint32 timer_callback(Uint32 interval, void *param);
-void draw_menu(SDL_Renderer *renderer, TTF_Font *font, int selected_item);
+void draw_menu(SDL_Renderer *renderer, TTF_Font *font, int selected_item, int selected_options);
 void draw_txt(SDL_Renderer *renderer, TTF_Font *font, const char *timer_text, int x, int y);
 void draw_options(SDL_Renderer *renderer, TTF_Font *font, int selected_options);
 // Timer callback function
@@ -39,6 +39,7 @@ Uint32 timer_callback(Uint32 interval, void *param)
 
 int main(int argc, char *argv[])
 {
+    //intialization of SDL 
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_AUDIO) != 0)
         return 1;
     if (TTF_Init() != 0)
@@ -102,6 +103,7 @@ int main(int argc, char *argv[])
                 switch (event.key.keysym.sym)
                 {
                 case SDLK_UP:
+                //scrolling up in main menu
                     selected_item--;
                     if (selected_item < MENU_START_GAME)
                     {
@@ -110,6 +112,7 @@ int main(int argc, char *argv[])
                     Mix_PlayChannel(-1, Clicksound, 0);
                     break;
                 case SDLK_DOWN:
+                //scrolling down in main menu
                     selected_item++;
                     if (selected_item > MENU_QUIT)
                     {
@@ -150,6 +153,7 @@ int main(int argc, char *argv[])
                                         ignore_up_down_events = false;
                                         break;
                                     case SDLK_UP:
+                                    //scrolling up in options menu
                                         selected_options--;
                                         if (selected_options < EASY || selected_options == -1)
                                         {
@@ -157,6 +161,7 @@ int main(int argc, char *argv[])
                                         }
                                         break;
                                     case SDLK_DOWN:
+                                    //scrolling down in option menu
                                         selected_options++;
                                         if (selected_options > HARD)
                                         {
@@ -169,6 +174,7 @@ int main(int argc, char *argv[])
                                         switch (selected_options)
                                         {
                                         case EASY:
+                                            //Start game with Easy difficulty
                                             counter = 6*60;
                                             break;
                                         case MED:
@@ -203,7 +209,7 @@ int main(int argc, char *argv[])
         char timer_text[32];
         if (set == MAIN_MENU)
         {
-            draw_menu(renderer, font, selected_item);
+            draw_menu(renderer, font, selected_item, selected_options);
         }
         else if (set == 0)
         {
@@ -240,17 +246,18 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-void draw_menu(SDL_Renderer *renderer, TTF_Font *font, int selected_item)
+void draw_menu(SDL_Renderer *renderer, TTF_Font *font, int selected_item, int selected_options)
 {
     SDL_Color color = {255, 255, 255, 255};
     SDL_Surface *text_surface;
     SDL_Texture *text_texture;
     SDL_Rect text_rect;
+    TTF_Font *font2 = TTF_OpenFont("fonts/Talk Comic.ttf", 28);
 
     // Clear the renderer
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
-
+    //tittle
     text_surface = TTF_RenderText_Blended(font, "the Hangman Game", color);
     text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
     text_rect.x = 170;
@@ -260,8 +267,20 @@ void draw_menu(SDL_Renderer *renderer, TTF_Font *font, int selected_item)
     SDL_RenderCopy(renderer, text_texture, NULL, &text_rect);
     SDL_FreeSurface(text_surface);
     SDL_DestroyTexture(text_texture);
-
-    // Draw the menu items with anti-aliasing
+    //difficulty level
+    char text_difficulty[32];
+    sprintf(text_difficulty, "Difficulty : %s", (selected_options == EASY) ? " Easy" : ((selected_options == MED) ? "Medium" : "Hard") );
+    text_surface = TTF_RenderText_Blended(font2, text_difficulty, color);
+    text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
+    text_rect.x = 440;
+    text_rect.y = 420;
+    text_rect.w = text_surface->w;
+    text_rect.h = text_surface->h;
+    SDL_RenderCopy(renderer, text_texture, NULL, &text_rect);
+    SDL_FreeSurface(text_surface);
+    SDL_DestroyTexture(text_texture);
+    
+    // Draw the menu items
     text_surface = TTF_RenderText_Blended(font, "Start Game", (selected_item == MENU_START_GAME) ? color : (SDL_Color){128, 128, 128, 255});
     text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
     text_rect.x = 250;
@@ -318,7 +337,7 @@ void draw_options(SDL_Renderer *renderer, TTF_Font *font, int selected_options)
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 
-    // Draw the options menu with anti-aliasing
+    // Draw the Difficulty tittle
     text_surface = TTF_RenderText_Blended(font, "Difficulty Level", color);
     text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
     text_rect.x = 230;
