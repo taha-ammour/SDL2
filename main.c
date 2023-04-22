@@ -25,6 +25,7 @@ Mix_Chunk *HIT;
 #define MENU_START_GAME 0
 #define MENU_OPTIONS 1
 #define MENU_QUIT 2
+
 bool fmenu = true;
 int set = MAIN_MENU;
 enum Difficulty
@@ -235,22 +236,57 @@ int main(int argc, char *argv[])
         {
             draw_menu(renderer, font38, selected_item, selected_options);
         }
-        else if (set == 0)
+        while (set == 0)
         {
 
-            ignore_up_down_events = true;
-            if (selected_item == MENU_START_GAME)
+            SDL_RenderPresent(renderer);
+            while (SDL_PollEvent(&event))
             {
-                if (counter > 0)
+                switch (event.type)
                 {
-                    sprintf(timer_text, "%02d:%02d", counter / 60, counter % 60);
-                    draw_txt(renderer, font38, timer_text, 0, 0);
+                case SDL_QUIT:
+                    quit = true;
+                    set = -1;
+                    break;
+                case SDL_KEYDOWN:
+                    switch (event.key.keysym.sym)
+                    {
+                    case SDLK_r:
+                        if (counter <= 0)
+                        {
+                            set = 4; // exit options menu
+                            switch (selected_options)
+                            {
+                            case EASY:
+                                // Start game with Easy difficulty
+                                counter = 6 * 60;
+                                break;
+                            case MED:
+                                // Start game with Medium difficulty
+                                counter = 4 * 60;
+                                break;
+                            case HARD:
+                                // Start game with Hard difficulty
+                                counter = 2 * 60;
+                                break;
+                            }
+                            ignore_up_down_events = false;
+                            break;
+                        }
+                    }
+                    break;
                 }
-                else
-                {
-                    sprintf(timer_text, "Time's up!");
-                    draw_txt(renderer, font38, timer_text, 100, 100);
-                }
+            }
+
+            if (counter > 0)
+            {
+                sprintf(timer_text, "%02d:%02d", counter / 60, counter % 60);
+                draw_txt(renderer, font38, timer_text, 0, 0);
+            }
+            else
+            {
+                sprintf(timer_text, "Time's up!");
+                draw_txt(renderer, font38, timer_text, 100, 100);
             }
         }
 
@@ -337,6 +373,9 @@ void draw_menu(SDL_Renderer *renderer, TTF_Font *font38, int selected_item, int 
 
 void draw_txt(SDL_Renderer *renderer, TTF_Font *font, const char *text, int x, int y)
 {
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderClear(renderer);
+
     SDL_Color color = {255, 255, 255, 255};
     SDL_Surface *surface = TTF_RenderText_Blended(font, text, color);
     SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
