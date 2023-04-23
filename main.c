@@ -30,9 +30,7 @@ bool fmenu = true;
 int set = MAIN_MENU;
 int score = 100;
 
-int liveseasy = 100 / 9 ;
-int livesmed = 100 / 6 ;
-int liveshard = 100 / 3 ;
+int livesrem;
 
 enum Difficulty
 {
@@ -113,6 +111,7 @@ int main(int argc, char *argv[])
     enum Difficulty selected_options;
     selected_options = EASY;
     int counter = 6 * 60; // 6 minutes
+    livesrem = 100 / 9 ;
     SDL_TimerID timer_id = SDL_AddTimer(1000, timer_callback, &counter);
     SDL_Event event;
     bool quit = false;
@@ -213,14 +212,17 @@ int main(int argc, char *argv[])
                                         case EASY:
                                             // Start game with Easy difficulty
                                             counter = 6 * 60;
+                                            livesrem = 100 / 9 ;
                                             break;
                                         case MED:
                                             // Start game with Medium difficulty
                                             counter = 4 * 60;
+                                            livesrem = 100 / 6 ;
                                             break;
                                         case HARD:
                                             // Start game with Hard difficulty
                                             counter = 2 * 60;
+                                            livesrem = 100 / 3 ;
                                             break;
                                         }
                                         break;
@@ -272,14 +274,17 @@ int main(int argc, char *argv[])
                             case EASY:
                                 // Start game with Easy difficulty
                                 counter = 6 * 60;
+                                livesrem = 100 / 9 ;
                                 break;
                             case MED:
                                 // Start game with Medium difficulty
                                 counter = 4 * 60;
+                                livesrem = 100 / 6 ;
                                 break;
                             case HARD:
                                 // Start game with Hard difficulty
                                 counter = 2 * 60;
+                                livesrem = 100 / 3 ;
                                 break;
                             }
                             ignore_up_down_events = false;
