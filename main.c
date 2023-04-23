@@ -30,6 +30,10 @@ bool fmenu = true;
 int set = MAIN_MENU;
 int score = 100;
 
+const int easylivetry = 9;
+const int medlivetry = 6;
+const int hardlivetry = 3;
+
 int livesrem;
 
 enum Difficulty
