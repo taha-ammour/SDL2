@@ -94,9 +94,12 @@ int main(int argc, char *argv[])
         SDL_Quit();
         return 1;
     }
-
+    
+    //import sounds
     Clicksound = Mix_LoadWAV("res/sfx/Click.wav");
     HIT = Mix_LoadWAV("res/sfx/hit.wav");
+
+
     int selected_item = MENU_START_GAME;
     enum Difficulty selected_options;
     selected_options = EASY;

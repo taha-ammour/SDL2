@@ -20,6 +20,11 @@
     },
     "peacock.color": "#dd0531",
     "files.associations": {
-        "unistd.h": "c"
+        "unistd.h": "c",
+        "sdl_mixer.h": "c",
+        "stdlib.h": "c",
+        "string.h": "c",
+        "math.h": "c",
+        "time.h": "c"
     }
 }
