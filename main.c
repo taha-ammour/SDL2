@@ -28,6 +28,12 @@ Mix_Chunk *HIT;
 
 bool fmenu = true;
 int set = MAIN_MENU;
+int score = 100;
+
+int liveseasy = 100 / 9 ;
+int livesmed = 100 / 6 ;
+int liveshard = 100 / 3 ;
+
 enum Difficulty
 {
     EASY,
@@ -35,8 +41,10 @@ enum Difficulty
     HARD
 };
 
+
 // function intialisation
 // TODO: MAKE the function for the hangman and apply words based on difficulty
+void score_txt(SDL_Renderer *renderer, TTF_Font *font, int score, int x, int y);
 Uint32 timer_callback(Uint32 interval, void *param);
 void draw_menu(SDL_Renderer *renderer, TTF_Font *font38, int selected_item, int selected_options);
 void draw_txt(SDL_Renderer *renderer, TTF_Font *font38, const char *timer_text, int x, int y);
@@ -55,6 +63,7 @@ Uint32 timer_callback(Uint32 interval, void *param)
 
 int main(int argc, char *argv[])
 {
+    
     // intialization of SDL
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_AUDIO) != 0)
         return 1;
@@ -284,7 +293,8 @@ int main(int argc, char *argv[])
             if (counter > 0)
             {
                 sprintf(timer_text, "%02d:%02d", counter / 60, counter % 60);
-                draw_txt(renderer, font38, timer_text, 0, 0);
+                draw_txt(renderer, font28, timer_text, 0, 0);
+                score_txt(renderer, font28, score, WINDOW_WIDTH - 170, 0);
             }
             else
             {
@@ -441,4 +451,24 @@ void draw_options(SDL_Renderer *renderer, TTF_Font *font38, int selected_options
 
     SDL_FreeSurface(text_surface);
     SDL_DestroyTexture(text_texture);
+}
+void score_txt(SDL_Renderer *renderer, TTF_Font *font, int score, int x, int y)
+{
+    
+    char score_str[32];
+    sprintf(score_str, "Score: %d", score);
+
+    
+    SDL_Color color = {255, 255, 255, 255};
+    SDL_Surface *surface = TTF_RenderText_Blended(font, score_str, color);
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+
+    
+    SDL_Rect dst_rect = { x, y, 0, 0 };
+    SDL_QueryTexture(texture, NULL, NULL, &dst_rect.w, &dst_rect.h);
+    SDL_RenderCopy(renderer, texture, NULL, &dst_rect);
+
+    
+    SDL_DestroyTexture(texture);
+    SDL_FreeSurface(surface);
 }
