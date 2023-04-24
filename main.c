@@ -21,6 +21,9 @@ TTF_Font *font28;
 Mix_Chunk *Clicksound;
 Mix_Chunk *HIT;
 
+SDL_Window *window;
+SDL_Renderer *renderer;
+
 #define MAIN_MENU 4
 #define MENU_START_GAME 0
 #define MENU_OPTIONS 1
@@ -46,11 +49,11 @@ enum Difficulty
 
 // function intialisation
 // TODO: MAKE the function for the hangman and apply words based on difficulty
-void score_txt(SDL_Renderer *renderer, TTF_Font *font, int score, int x, int y);
+void score_txt(TTF_Font *font, int score, int x, int y);
 Uint32 timer_callback(Uint32 interval, void *param);
-void draw_menu(SDL_Renderer *renderer, TTF_Font *font38, int selected_item, int selected_options);
-void draw_txt(SDL_Renderer *renderer, TTF_Font *font38, const char *timer_text, int x, int y);
-void draw_options(SDL_Renderer *renderer, TTF_Font *font38, int selected_options);
+void draw_menu(TTF_Font *font38, int selected_item, int selected_options);
+void draw_txt(TTF_Font *font38, const char *timer_text, int x, int y);
+void draw_options(TTF_Font *font38, int selected_options);
 // Timer callback function
 Uint32 timer_callback(Uint32 interval, void *param)
 {
@@ -78,7 +81,7 @@ int main(int argc, char *argv[])
     Mix_Init(MIX_INIT_MP3 | MIX_INIT_OGG);
     Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
     // create window
-    SDL_Window *window = SDL_CreateWindow("Hangman", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
+    window = SDL_CreateWindow("Hangman", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
     if (!window)
     {
         TTF_Quit();
@@ -86,7 +89,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (!renderer)
     {
         SDL_DestroyWindow(window);
@@ -173,7 +176,7 @@ int main(int argc, char *argv[])
                         ignore_up_down_events = true;
                         while (set == 1)
                         {
-                            draw_options(renderer, font38, selected_options); // draw the options menu and highlight the selected difficulty
+                            draw_options(font38, selected_options); // draw the options menu and highlight the selected difficulty
                             SDL_RenderPresent(renderer);
                             while (SDL_PollEvent(&event))
                             {
@@ -252,7 +255,7 @@ int main(int argc, char *argv[])
         char timer_text[32];
         if (set == MAIN_MENU)
         {
-            draw_menu(renderer, font38, selected_item, selected_options);
+            draw_menu(font38, selected_item, selected_options);
         }
         while (set == 0)
         {
@@ -302,13 +305,14 @@ int main(int argc, char *argv[])
             if (counter > 0)
             {
                 sprintf(timer_text, "%02d:%02d", counter / 60, counter % 60);
-                draw_txt(renderer, font28, timer_text, 0, 0);
-                score_txt(renderer, font28, score, WINDOW_WIDTH - 170, 0);
+                draw_txt(font28, timer_text, 0, 0);
+                score_txt(font28, score, WINDOW_WIDTH - 170, 0);
             }
             else
             {
                 sprintf(timer_text, "Time's up!");
-                draw_txt(renderer, font38, timer_text, 100, 100);
+                draw_txt( font38, timer_text, 100, 100);
+                score_txt(font38, score, WINDOW_WIDTH/2 - 110, WINDOW_HEIGHT/2);
             }
         }
 
@@ -328,7 +332,7 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-void draw_menu(SDL_Renderer *renderer, TTF_Font *font38, int selected_item, int selected_options)
+void draw_menu( TTF_Font *font38, int selected_item, int selected_options)
 {
     SDL_Color color = {255, 255, 255, 255};
     SDL_Surface *text_surface;
@@ -393,7 +397,7 @@ void draw_menu(SDL_Renderer *renderer, TTF_Font *font38, int selected_item, int 
     SDL_DestroyTexture(text_texture);
 }
 
-void draw_txt(SDL_Renderer *renderer, TTF_Font *font, const char *text, int x, int y)
+void draw_txt( TTF_Font *font, const char *text, int x, int y)
 {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
@@ -408,7 +412,7 @@ void draw_txt(SDL_Renderer *renderer, TTF_Font *font, const char *text, int x, i
     SDL_FreeSurface(surface);
 }
 
-void draw_options(SDL_Renderer *renderer, TTF_Font *font38, int selected_options)
+void draw_options( TTF_Font *font38, int selected_options)
 {
     SDL_Color color = {255, 255, 255, 255};
     SDL_Surface *text_surface;
@@ -461,7 +465,7 @@ void draw_options(SDL_Renderer *renderer, TTF_Font *font38, int selected_options
     SDL_FreeSurface(text_surface);
     SDL_DestroyTexture(text_texture);
 }
-void score_txt(SDL_Renderer *renderer, TTF_Font *font, int score, int x, int y)
+void score_txt( TTF_Font *font, int score, int x, int y)
 {
     
     char score_str[32];
