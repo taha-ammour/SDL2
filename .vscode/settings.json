@@ -25,6 +25,7 @@
         "stdlib.h": "c",
         "string.h": "c",
         "math.h": "c",
-        "time.h": "c"
+        "time.h": "c",
+        "sdl.h": "c"
     }
 }
