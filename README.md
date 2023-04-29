@@ -6,9 +6,11 @@
 
 use `make` to run the code
 
-- [x] #739
-- [ ] https://github.com/octo-org/octo-repo/issues/740
-- [ ] Add delight to the experience when all tasks are complete :tada:
+- [x] main menu with options :check:
+- [ ] 
 - [ ] Add a "game over" screen when the game is over
+- [ ] finish the game :tada:
 
+<!-- markdownlint-capture -->no
+d
 made by @taha-ammour
