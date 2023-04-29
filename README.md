@@ -7,10 +7,15 @@
 use `make` to run the code
 
 - [x] main menu with options :check:
-- [ ] 
+- [ ] handle game mechanic
 - [ ] Add a "game over" screen when the game is over
 - [ ] finish the game :tada:
 
-<!-- markdownlint-capture -->no
-d
-made by @taha-ammour
+```c
+#include <sdl/sdl2.h>
+```
+<!-- markdownlint-capture -->
+
+**made by :**
+@taha-ammour
+----------
