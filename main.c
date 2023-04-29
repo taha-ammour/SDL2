@@ -46,7 +46,6 @@ enum Difficulty
     HARD
 };
 
-
 // function intialisation
 // TODO: MAKE the function for the hangman and apply words based on difficulty
 void score_txt(TTF_Font *font, int score, int x, int y);
@@ -54,6 +53,7 @@ Uint32 timer_callback(Uint32 interval, void *param);
 void draw_menu(TTF_Font *font38, int selected_item, int selected_options);
 void draw_txt(TTF_Font *font38, const char *timer_text, int x, int y);
 void draw_options(TTF_Font *font38, int selected_options);
+void drawHangman(int wrongGuesses);
 // Timer callback function
 Uint32 timer_callback(Uint32 interval, void *param)
 {
@@ -68,7 +68,7 @@ Uint32 timer_callback(Uint32 interval, void *param)
 
 int main(int argc, char *argv[])
 {
-    
+
     // intialization of SDL
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_AUDIO) != 0)
         return 1;
@@ -108,17 +108,16 @@ int main(int argc, char *argv[])
         SDL_Quit();
         return 1;
     }
-    
-    //import sounds
+
+    // import sounds
     Clicksound = Mix_LoadWAV("res/sfx/Click.wav");
     HIT = Mix_LoadWAV("res/sfx/hit.wav");
-
 
     int selected_item = MENU_START_GAME;
     enum Difficulty selected_options;
     selected_options = EASY;
     int counter = 6 * 60; // 6 minutes
-    livesrem = 100 / 9 ;
+    livesrem = 100 / 9;
     SDL_TimerID timer_id = SDL_AddTimer(1000, timer_callback, &counter);
     SDL_Event event;
     bool quit = false;
@@ -219,17 +218,17 @@ int main(int argc, char *argv[])
                                         case EASY:
                                             // Start game with Easy difficulty
                                             counter = 6 * 60;
-                                            livesrem = 100 / 9 ;
+                                            livesrem = 100 / 9;
                                             break;
                                         case MED:
                                             // Start game with Medium difficulty
                                             counter = 4 * 60;
-                                            livesrem = 100 / 6 ;
+                                            livesrem = 100 / 6;
                                             break;
                                         case HARD:
                                             // Start game with Hard difficulty
                                             counter = 2 * 60;
-                                            livesrem = 100 / 3 ;
+                                            livesrem = 100 / 3;
                                             break;
                                         }
                                         break;
@@ -281,23 +280,41 @@ int main(int argc, char *argv[])
                             case EASY:
                                 // Start game with Easy difficulty
                                 counter = 6 * 60;
-                                livesrem = 100 / 9 ;
+                                livesrem = 100 / 9;
                                 break;
                             case MED:
                                 // Start game with Medium difficulty
                                 counter = 4 * 60;
-                                livesrem = 100 / 6 ;
+                                livesrem = 100 / 6;
                                 break;
                             case HARD:
                                 // Start game with Hard difficulty
                                 counter = 2 * 60;
-                                livesrem = 100 / 3 ;
+                                livesrem = 100 / 3;
                                 break;
                             }
                             ignore_up_down_events = false;
-                            break;
                         }
+                        break;
                     }
+                    //FIXME:
+                    // if (event.key.keysym.sym >= SDLK_a && event.key.keysym.sym <= SDLK_z)
+                    // {
+                    //     char letter = (char)(event.key.keysym.sym - SDLK_a + 'a');
+                    //     int found = 0;
+                    //     for (int i = 0; i < word_len; i++)
+                    //     {
+                    //         if (word[i] == letter)
+                    //         {
+                    //             guess_state[i] = 1;
+                    //             found = 1;
+                    //         }
+                    //     }
+                    //     if (!found)
+                    //     {
+                    //         tries++;
+                    //     }
+                    // }
                     break;
                 }
             }
@@ -307,12 +324,13 @@ int main(int argc, char *argv[])
                 sprintf(timer_text, "%02d:%02d", counter / 60, counter % 60);
                 draw_txt(font28, timer_text, 0, 0);
                 score_txt(font28, score, WINDOW_WIDTH - 170, 0);
+                drawHangman(6);
             }
             else
             {
                 sprintf(timer_text, "Time's up!");
-                draw_txt( font38, timer_text, 100, 100);
-                score_txt(font38, score, WINDOW_WIDTH/2 - 110, WINDOW_HEIGHT/2);
+                draw_txt(font38, timer_text, 100, 100);
+                score_txt(font38, score, WINDOW_WIDTH / 2 - 110, WINDOW_HEIGHT / 2);
             }
         }
 
@@ -332,7 +350,7 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-void draw_menu( TTF_Font *font38, int selected_item, int selected_options)
+void draw_menu(TTF_Font *font38, int selected_item, int selected_options)
 {
     SDL_Color color = {255, 255, 255, 255};
     SDL_Surface *text_surface;
@@ -397,7 +415,7 @@ void draw_menu( TTF_Font *font38, int selected_item, int selected_options)
     SDL_DestroyTexture(text_texture);
 }
 
-void draw_txt( TTF_Font *font, const char *text, int x, int y)
+void draw_txt(TTF_Font *font, const char *text, int x, int y)
 {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
@@ -412,7 +430,7 @@ void draw_txt( TTF_Font *font, const char *text, int x, int y)
     SDL_FreeSurface(surface);
 }
 
-void draw_options( TTF_Font *font38, int selected_options)
+void draw_options(TTF_Font *font38, int selected_options)
 {
     SDL_Color color = {255, 255, 255, 255};
     SDL_Surface *text_surface;
@@ -465,23 +483,85 @@ void draw_options( TTF_Font *font38, int selected_options)
     SDL_FreeSurface(text_surface);
     SDL_DestroyTexture(text_texture);
 }
-void score_txt( TTF_Font *font, int score, int x, int y)
+
+void score_txt(TTF_Font *font, int score, int x, int y)
 {
-    
+
     char score_str[32];
     sprintf(score_str, "Score: %d", score);
 
-    
     SDL_Color color = {255, 255, 255, 255};
     SDL_Surface *surface = TTF_RenderText_Blended(font, score_str, color);
     SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
 
-    
-    SDL_Rect dst_rect = { x, y, 0, 0 };
+    SDL_Rect dst_rect = {x, y, 0, 0};
     SDL_QueryTexture(texture, NULL, NULL, &dst_rect.w, &dst_rect.h);
     SDL_RenderCopy(renderer, texture, NULL, &dst_rect);
 
-    
     SDL_DestroyTexture(texture);
     SDL_FreeSurface(surface);
+}
+
+void drawHangman(int wrongGuesses)
+{
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+
+    // Draw the noose
+    SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xC0);
+    for (int i = 0; i < 3; i++)
+    {
+        SDL_RenderDrawLine(renderer, 250 + i, 50 + i, 250 + i, 350);
+        SDL_RenderDrawLine(renderer, 250 + i, 50 + i, 450, 50 + i);
+        SDL_RenderDrawLine(renderer, 450 + i, 50, 450 + i, 100);
+        SDL_RenderDrawLine(renderer, 200, 350 + i, 300, 350 + i);
+    }
+
+    // Draw the person
+    SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xC0);
+    for (int i = 0; i < 4; i++)
+    {
+        if (wrongGuesses >= 1)
+        {
+            SDL_RenderDrawLine(renderer, 450 + i, 160, 450 + i, 250); // Body
+        }
+        if (wrongGuesses >= 2)
+        {
+            SDL_RenderDrawLine(renderer, 450 + i, 200, 400 + i, 150); // Left arm
+        }
+        if (wrongGuesses >= 3)
+        {
+            SDL_RenderDrawLine(renderer, 450 + i, 200, 500 + i, 150); // Right arm
+        }
+        if (wrongGuesses >= 4)
+        {
+            SDL_RenderDrawLine(renderer, 450 + i, 250, 400 + i, 300); // Left leg
+        }
+        if (wrongGuesses >= 5)
+        {
+            SDL_RenderDrawLine(renderer, 450 + i, 250, 500 + i, 300); // Right leg
+        }
+    }
+
+    // Draw the head
+    SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xC0);
+    if (wrongGuesses >= 1)
+    {
+        int centerX = 451;
+        int centerY = 130;
+        int radius = 30;
+        for (double i = 0; i < 360; i += 1)
+        {
+            double angle = i * M_PI / 180;
+            int x = centerX + (int)(radius * cos(angle));
+            int y = centerY + (int)(radius * sin(angle));
+
+            SDL_RenderDrawPoint(renderer, x, y);
+            SDL_RenderDrawPoint(renderer, x + 1, y);
+            SDL_RenderDrawPoint(renderer, x, y + 1);
+            SDL_RenderDrawPoint(renderer, x - 1, y);
+            SDL_RenderDrawPoint(renderer, x, y - 1);
+        }
+    }
+
+    SDL_RenderPresent(renderer);
 }
