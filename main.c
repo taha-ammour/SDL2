@@ -19,6 +19,7 @@ TTF_Font *font38;
 TTF_Font *font28;
 
 Mix_Chunk *Clicksound;
+Mix_Chunk *Clicksound2;
 Mix_Chunk *HIT;
 
 SDL_Window *window;
@@ -112,6 +113,7 @@ int main(int argc, char *argv[])
     // import sounds
     Clicksound = Mix_LoadWAV("res/sfx/Click.wav");
     HIT = Mix_LoadWAV("res/sfx/hit.wav");
+    Clicksound2 = Mix_LoadWAV("res/sfx/Click2.wav");
 
     int selected_item = MENU_START_GAME;
     enum Difficulty selected_options;
@@ -200,6 +202,8 @@ int main(int argc, char *argv[])
                                         {
                                             selected_options = HARD;
                                         }
+                                        Mix_PlayChannel(-1, Clicksound2, 0);
+
                                         break;
                                     case SDLK_DOWN:
                                         // scrolling down in option menu
@@ -208,6 +212,8 @@ int main(int argc, char *argv[])
                                         {
                                             selected_options = EASY;
                                         }
+                                        Mix_PlayChannel(-1, Clicksound2, 0);
+
                                         break;
                                     case SDLK_RETURN:
                                         set = 4;
