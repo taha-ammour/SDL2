@@ -29,6 +29,9 @@ SDL_Renderer *renderer;
 #define MENU_START_GAME 0
 #define MENU_OPTIONS 1
 #define MENU_QUIT 2
+#define WORD_LIST_SIZE 10
+
+char *word_list[WORD_LIST_SIZE] = {"hangman", "computer", "keyboard", "mouse", "monitor", "printer", "scanner", "software", "hardware", "database"};
 
 bool fmenu = true;
 int set = MAIN_MENU;
@@ -109,6 +112,16 @@ int main(int argc, char *argv[])
         SDL_Quit();
         return 1;
     }
+    // Randomly select a word from the word list
+    srand(time(NULL));
+    int word_index = rand() % WORD_LIST_SIZE;
+    char *word = word_list[word_index];
+    int word_length = strlen(word);
+
+    // Initialize the game variables
+    int incorrect_guesses = 0;
+    int correct_guesses = 0;
+    char guessed_letters[26];
 
     // import sounds
     Clicksound = Mix_LoadWAV("res/sfx/Click.wav");
@@ -256,6 +269,7 @@ int main(int argc, char *argv[])
         }
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
+
         // Draw the menu
         char timer_text[32];
         if (set == MAIN_MENU)
@@ -303,24 +317,45 @@ int main(int argc, char *argv[])
                         }
                         break;
                     }
-                    //FIXME:
-                    // if (event.key.keysym.sym >= SDLK_a && event.key.keysym.sym <= SDLK_z)
-                    // {
-                    //     char letter = (char)(event.key.keysym.sym - SDLK_a + 'a');
-                    //     int found = 0;
-                    //     for (int i = 0; i < word_len; i++)
-                    //     {
-                    //         if (word[i] == letter)
-                    //         {
-                    //             guess_state[i] = 1;
-                    //             found = 1;
-                    //         }
-                    //     }
-                    //     if (!found)
-                    //     {
-                    //         tries++;
-                    //     }
-                    // }
+                    // FIXME:
+
+                    char letter = event.key.keysym.sym;
+                    if (letter >= 'a' && letter <= 'z')
+                    {
+                        // Check if the letter has already been guessed
+                        int already_guessed = 0;
+                        for (int i = 0; i < correct_guesses + incorrect_guesses; i++)
+                        {
+                            if (guessed_letters[i] == letter)
+                            {
+                                already_guessed = 1;
+                                break;
+                            }
+                        }
+                        if (!already_guessed)
+                        {
+                            // Check if the letter is in the word
+                            int letter_found = 0;
+                            for (int i = 0; i < word_length; i++)
+                            {
+                                if (word[i] == letter)
+                                {
+                                    letter_found = 1;
+                                    break;
+                                }
+                            }
+                            if (letter_found)
+                            {
+                                guessed_letters[correct_guesses + incorrect_guesses] = letter;
+                                correct_guesses++;
+                            }
+                            else
+                            {
+                                guessed_letters[correct_guesses + incorrect_guesses] = letter;
+                                incorrect_guesses++;
+                            }
+                        }
+                    }
                     break;
                 }
             }
@@ -331,6 +366,26 @@ int main(int argc, char *argv[])
                 draw_txt(font28, timer_text, 0, 0);
                 score_txt(font28, score, WINDOW_WIDTH - 170, 0);
                 drawHangman(6);
+                for (int i = 0; i < word_length; i++)
+                {
+                    int letter_guessed = 0;
+                    for (int j = 0; j < correct_guesses; j++)
+                    {
+                        if (guessed_letters[j] == word[i])
+                        {
+                            letter_guessed = 1;
+                            break;
+                        }
+                    }
+                    if (letter_guessed)
+                    {
+                        // Draw the letter
+                    }
+                    else
+                    {
+                        // Draw a blank space
+                    }
+                }
             }
             else
             {
