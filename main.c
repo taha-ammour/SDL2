@@ -56,6 +56,8 @@ void score_txt(TTF_Font *font, int score, int x, int y);
 Uint32 timer_callback(Uint32 interval, void *param);
 void draw_menu(TTF_Font *font38, int selected_item, int selected_options);
 void draw_txt(TTF_Font *font38, const char *timer_text, int x, int y);
+void draw_txt_ung(TTF_Font *font38, const char *timer_text, int x, int y);
+void draw_txt_g(TTF_Font *font38, const char *timer_text, int x, int y);
 void draw_options(TTF_Font *font38, int selected_options);
 void drawHangman(int wrongGuesses);
 // Timer callback function
@@ -380,6 +382,7 @@ int main(int argc, char *argv[])
                     if (letter_guessed)
                     {
                         // Draw the letter
+                        draw_txt_g(font38, guessed_letters,100, 100);
                     }
                     else
                     {
@@ -625,4 +628,34 @@ void drawHangman(int wrongGuesses)
     }
 
     SDL_RenderPresent(renderer);
+}
+
+void draw_txt_ung(TTF_Font *font, const char *text, int x, int y)
+{
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderClear(renderer);
+
+    SDL_Color color = {255, 255, 255, 255};
+    SDL_Surface *surface = TTF_RenderText_Blended(font, text, color);
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_Rect text_rect = {x, y, 0, 0};
+    SDL_QueryTexture(texture, NULL, NULL, &text_rect.w, &text_rect.h);
+    SDL_RenderCopy(renderer, texture, NULL, &text_rect);
+    SDL_DestroyTexture(texture);
+    SDL_FreeSurface(surface);
+}
+
+void draw_txt_g(TTF_Font *font, const char *text, int x, int y)
+{
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderClear(renderer);
+
+    SDL_Color color = {255, 255, 255, 255};
+    SDL_Surface *surface = TTF_RenderText_Blended(font, text, color);
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_Rect text_rect = {x, y, 0, 0};
+    SDL_QueryTexture(texture, NULL, NULL, &text_rect.w, &text_rect.h);
+    SDL_RenderCopy(renderer, texture, NULL, &text_rect);
+    SDL_DestroyTexture(texture);
+    SDL_FreeSurface(surface);
 }
