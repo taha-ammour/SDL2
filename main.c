@@ -21,6 +21,7 @@ TTF_Font *font28;
 Mix_Chunk *Clicksound;
 Mix_Chunk *Clicksound2;
 Mix_Chunk *HIT;
+Mix_Chunk *FALSEWAV;
 
 SDL_Window *window;
 SDL_Renderer *renderer;
@@ -122,12 +123,13 @@ int main(int argc, char *argv[])
     Clicksound = Mix_LoadWAV("res/sfx/Click.wav");
     HIT = Mix_LoadWAV("res/sfx/hit.wav");
     Clicksound2 = Mix_LoadWAV("res/sfx/Click2.wav");
+    FALSEWAV = Mix_LoadWAV("res/sfx/false.wav");
 
     int selected_item = MENU_START_GAME;
     enum Difficulty selected_options;
     selected_options = EASY;
     int counter = 6 * 60; // 6 minutes
-    livesrem = 100 / 9;
+
     SDL_TimerID timer_id = SDL_AddTimer(1000, timer_callback, &counter);
     SDL_Event event;
     bool quit = false;
@@ -142,7 +144,7 @@ int main(int argc, char *argv[])
         int word_length = strlen(word);
         char incorrect_guesses_letters[6];
         memset(incorrect_guesses_letters, 0, sizeof(incorrect_guesses_letters));
-
+        livesrem = 100 / 9;
         // Initialize the game variables
         int incorrect_guesses = 0;
         int correct_guesses = 0;
@@ -208,7 +210,7 @@ int main(int argc, char *argv[])
                                     switch (event.key.keysym.sym)
                                     {
                                     case SDLK_r:
-                                        if (counter <= 0 || check_game_over(guessed_letterss, word_length))
+                                        if (counter <= 0 || check_game_over(guessed_letterss, word_length) || incorrect_guesses >= diffinco)
                                         {
                                             set = 4; // exit options menu
                                             switch (selected_options)
@@ -246,7 +248,7 @@ int main(int argc, char *argv[])
                                         bool already_guessed = false;
                                         for (int i = 0; i < correct_guesses + incorrect_guesses; i++)
                                         {
-                                            if (guessed_letters[i] == letter)
+                                            if (guessed_letters[i] == letter )
                                             {
                                                 already_guessed = true;
                                                 break;
@@ -260,7 +262,7 @@ int main(int argc, char *argv[])
                                             bool already_incorrect = false;
                                             for (int i = 0; i < incorrect_guesses; i++)
                                             {
-                                                if (incorrect_guesses_letters[i] == letter)
+                                                if (incorrect_guesses_letters[i] == letter && incorrect_guesses < diffinco)
                                                 {
                                                     already_incorrect = true;
                                                     break;
@@ -272,7 +274,7 @@ int main(int argc, char *argv[])
                                             {
                                                 for (int i = 0; i < word_length; i++)
                                                 {
-                                                    if (word[i] == letter)
+                                                    if (word[i] == letter && incorrect_guesses < diffinco )
                                                     {
                                                         guessed_letterss[i] = true;
                                                         found_letter = true;
@@ -280,27 +282,25 @@ int main(int argc, char *argv[])
                                                 }
 
                                                 // If the letter was not found in the word, add it to the list of incorrect guesses
-                                                if (!found_letter)
+                                                if (!found_letter && incorrect_guesses < diffinco && !check_game_over(guessed_letterss, word_length))
                                                 {
                                                     incorrect_guesses_letters[incorrect_guesses] = letter;
                                                     incorrect_guesses++;
+                                                    Mix_PlayChannel(-1, FALSEWAV, 0);
+
                                                     score -= livesrem;
                                                 }
                                             }
                                         }
 
-                                        if (incorrect_guesses >= diffinco)
-                                        {
-                                            counter = 0;
-                                            incorrect_guesses = 0;
-                                        }
+                                        
                                     }
 
                                     break;
                                 }
                             }
 
-                            if (counter > 0 && !check_game_over(guessed_letterss, word_length))
+                            if (counter > 0 && !check_game_over(guessed_letterss, word_length) && incorrect_guesses < diffinco)
                             {
                                 sprintf(timer_text, "%02d:%02d", counter / 60, counter % 60);
                                 draw_txt(font28, timer_text, 0, 0);
@@ -649,7 +649,7 @@ void drawHangman(int wrongGuesses, int selected_options)
             }
         }
         break;
-        case MED:
+    case MED:
         for (int i = 0; i < 4; i++)
         {
             if (wrongGuesses >= 2)
@@ -695,7 +695,7 @@ void drawHangman(int wrongGuesses, int selected_options)
             }
         }
         break;
-        case HARD:
+    case HARD:
         for (int i = 0; i < 4; i++)
         {
             if (wrongGuesses >= 1)
@@ -742,7 +742,7 @@ void drawHangman(int wrongGuesses, int selected_options)
         }
         break;
     default:
-    for (int i = 0; i < 4; i++)
+        for (int i = 0; i < 4; i++)
         {
             if (wrongGuesses >= 3)
             {
