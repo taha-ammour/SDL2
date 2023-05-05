@@ -7,7 +7,7 @@
 use `make` to run the code
 
 - [x] main menu with options :check:
-- [?] handle game mechanic
+- [x] handle game mechanic
 - [ ] Add a "game over" screen when the game is over
 - [ ] finish the game :tada:
 
