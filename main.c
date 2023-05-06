@@ -53,6 +53,7 @@ enum Difficulty
 
 // function intialisation
 // TODO: MAKE the function for the hangman and apply words based on difficulty
+void Sdlinti();
 void score_txt(TTF_Font *font, int score, int x, int y);
 Uint32 timer_callback(Uint32 interval, void *param);
 void draw_menu(TTF_Font *font38, int selected_item, int selected_options);
@@ -77,45 +78,8 @@ Uint32 timer_callback(Uint32 interval, void *param)
 int main(int argc, char *argv[])
 {
 
-    // intialization of SDL
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_AUDIO) != 0)
-        return 1;
-    if (TTF_Init() != 0)
-    {
-        SDL_Quit();
-        return 1;
-    }
-    // initialize music
-    Mix_Init(MIX_INIT_MP3 | MIX_INIT_OGG);
-    Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
-    // create window
-    window = SDL_CreateWindow("Hangman", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
-    if (!window)
-    {
-        TTF_Quit();
-        SDL_Quit();
-        return 1;
-    }
-
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if (!renderer)
-    {
-        SDL_DestroyWindow(window);
-        TTF_Quit();
-        SDL_Quit();
-        return 1;
-    }
-
-    font28 = TTF_OpenFont("fonts/Talk Comic.ttf", 28);
-    font38 = TTF_OpenFont("fonts/Talk Comic.ttf", 38);
-    if (!font28 || !font38)
-    {
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
-        TTF_Quit();
-        SDL_Quit();
-        return 1;
-    }
+    Sdlinti();
+    
     // Randomly select a word from the word list
     srand(time(NULL));
 
@@ -136,15 +100,16 @@ int main(int argc, char *argv[])
     bool ignore_up_down_events = false;
     bool timer_started = false;
     char timer_text[32];
+    livesrem = 100 / 9;
     int diffinco = 9;
     while (!quit)
     {
         int word_index = rand() % WORD_LIST_SIZE;
         char *word = word_list[word_index];
         int word_length = strlen(word);
-        char incorrect_guesses_letters[6];
+        char incorrect_guesses_letters[9];
         memset(incorrect_guesses_letters, 0, sizeof(incorrect_guesses_letters));
-        livesrem = 100 / 9;
+        
         // Initialize the game variables
         int incorrect_guesses = 0;
         int correct_guesses = 0;
@@ -248,7 +213,7 @@ int main(int argc, char *argv[])
                                         bool already_guessed = false;
                                         for (int i = 0; i < correct_guesses + incorrect_guesses; i++)
                                         {
-                                            if (guessed_letters[i] == letter )
+                                            if (guessed_letters[i] == letter)
                                             {
                                                 already_guessed = true;
                                                 break;
@@ -274,7 +239,7 @@ int main(int argc, char *argv[])
                                             {
                                                 for (int i = 0; i < word_length; i++)
                                                 {
-                                                    if (word[i] == letter && incorrect_guesses < diffinco )
+                                                    if (word[i] == letter && incorrect_guesses < diffinco)
                                                     {
                                                         guessed_letterss[i] = true;
                                                         found_letter = true;
@@ -292,8 +257,6 @@ int main(int argc, char *argv[])
                                                 }
                                             }
                                         }
-
-                                        
                                     }
 
                                     break;
@@ -315,7 +278,7 @@ int main(int argc, char *argv[])
                                 sprintf(timer_text, "Time's up!");
                                 draw_txt(font38, timer_text, 100, 100);
                                 score_txt(font38, score, WINDOW_WIDTH / 2 - 110, WINDOW_HEIGHT / 2);
-                                livesrem = 0;
+                                
                             }
                         }
 
@@ -854,4 +817,47 @@ void draw_tries(TTF_Font *font, int selected_options, int try)
 
     SDL_DestroyTexture(texture);
     SDL_FreeSurface(surface);
+}
+void Sdlinti()
+{
+
+    // intialization of SDL
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_AUDIO) != 0)
+        return ;
+    if (TTF_Init() != 0)
+    {
+        SDL_Quit();
+        return ;
+    }
+    // initialize music
+    Mix_Init(MIX_INIT_MP3 | MIX_INIT_OGG);
+    Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
+    // create window
+    window = SDL_CreateWindow("Hangman", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
+    if (!window)
+    {
+        TTF_Quit();
+        SDL_Quit();
+        return ;
+    }
+
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    if (!renderer)
+    {
+        SDL_DestroyWindow(window);
+        TTF_Quit();
+        SDL_Quit();
+        return ;
+    }
+
+    font28 = TTF_OpenFont("fonts/Talk Comic.ttf", 28);
+    font38 = TTF_OpenFont("fonts/Talk Comic.ttf", 38);
+    if (!font28 || !font38)
+    {
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        TTF_Quit();
+        SDL_Quit();
+        return ;
+    }
 }
