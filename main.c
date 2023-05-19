@@ -113,7 +113,6 @@ int main(int argc, char *argv[])
         // Initialize the game variables
         int incorrect_guesses = 0;
         int correct_guesses = 0;
-        char guessed_letters[26];
         bool guessed_letterss[word_length];
         memset(guessed_letterss, false, sizeof(guessed_letterss));
         score = 100;
@@ -213,7 +212,7 @@ int main(int argc, char *argv[])
                                         bool already_guessed = false;
                                         for (int i = 0; i < correct_guesses + incorrect_guesses; i++)
                                         {
-                                            if (guessed_letters[i] == letter)
+                                            if (incorrect_guesses_letters[i] == letter)
                                             {
                                                 already_guessed = true;
                                                 break;
