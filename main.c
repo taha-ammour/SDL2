@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
 {
 
     Sdlinti();
-    
+
     // Randomly select a word from the word list
     srand(time(NULL));
 
@@ -108,8 +108,10 @@ int main(int argc, char *argv[])
         char *word = word_list[word_index];
         int word_length = strlen(word);
         char incorrect_guesses_letters[9];
+        char correct_guesses_letters[100];
         memset(incorrect_guesses_letters, 0, sizeof(incorrect_guesses_letters));
-        
+        memset(correct_guesses_letters, 0, sizeof(correct_guesses_letters));
+
         // Initialize the game variables
         int incorrect_guesses = 0;
         int correct_guesses = 0;
@@ -156,7 +158,18 @@ int main(int argc, char *argv[])
                         Mix_PlayChannel(-1, HIT, 0);
                         // Handle start game
                         printf("nop");
+                    s:
+                        word_index = rand() % WORD_LIST_SIZE;
+                        char *word = word_list[word_index];
+                        int word_length = strlen(word);
+                        char incorrect_guesses_letters[9];
+                        char correct_guesses_letters[100];
+                        memset(incorrect_guesses_letters, 0, sizeof(incorrect_guesses_letters));
+                        memset(correct_guesses_letters, 0, sizeof(correct_guesses_letters));
 
+                        // Initialize the game variables
+                        int correct_guesses = 0;
+                        memset(guessed_letterss, false, sizeof(guessed_letterss));
                         set = 0;
                         while (set == 0)
                         {
@@ -212,7 +225,7 @@ int main(int argc, char *argv[])
                                         bool already_guessed = false;
                                         for (int i = 0; i < correct_guesses + incorrect_guesses; i++)
                                         {
-                                            if (incorrect_guesses_letters[i] == letter)
+                                            if (correct_guesses_letters[i] == letter)
                                             {
                                                 already_guessed = true;
                                                 break;
@@ -226,7 +239,7 @@ int main(int argc, char *argv[])
                                             bool already_incorrect = false;
                                             for (int i = 0; i < incorrect_guesses; i++)
                                             {
-                                                if (incorrect_guesses_letters[i] == letter && incorrect_guesses < diffinco)
+                                                if (incorrect_guesses_letters[i] == letter)
                                                 {
                                                     already_incorrect = true;
                                                     break;
@@ -234,11 +247,11 @@ int main(int argc, char *argv[])
                                             }
 
                                             // If the letter has not been guessed incorrectly before, check if it is in the word
-                                            if (!already_incorrect)
+                                            if (!already_incorrect && incorrect_guesses < diffinco)
                                             {
                                                 for (int i = 0; i < word_length; i++)
                                                 {
-                                                    if (word[i] == letter && incorrect_guesses < diffinco)
+                                                    if (word[i] == letter)
                                                     {
                                                         guessed_letterss[i] = true;
                                                         found_letter = true;
@@ -246,13 +259,19 @@ int main(int argc, char *argv[])
                                                 }
 
                                                 // If the letter was not found in the word, add it to the list of incorrect guesses
-                                                if (!found_letter && incorrect_guesses < diffinco && !check_game_over(guessed_letterss, word_length))
+                                                if (!found_letter && !check_game_over(guessed_letterss, word_length))
                                                 {
                                                     incorrect_guesses_letters[incorrect_guesses] = letter;
                                                     incorrect_guesses++;
                                                     Mix_PlayChannel(-1, FALSEWAV, 0);
 
                                                     score -= livesrem;
+                                                }
+                                                else if (found_letter && !check_game_over(guessed_letterss, word_length))
+                                                {
+                                                    correct_guesses_letters[correct_guesses] = letter;
+                                                    correct_guesses++;
+                                                    score += livesrem;
                                                 }
                                             }
                                         }
@@ -274,10 +293,21 @@ int main(int argc, char *argv[])
                             }
                             else
                             {
-                                sprintf(timer_text, "Time's up!");
+                                if (counter <= 0)
+                                {
+                                    sprintf(timer_text, "Time's up!");
+                                }
+                                else if (check_game_over(guessed_letterss, word_length))
+                                {
+                                    goto s;
+                                }
+                                else if (incorrect_guesses >= diffinco)
+                                {
+                                    sprintf(timer_text, "Out of tries!");
+                                }
+
                                 draw_txt(font38, timer_text, 100, 100);
                                 score_txt(font38, score, WINDOW_WIDTH / 2 - 110, WINDOW_HEIGHT / 2);
-                                
                             }
                         }
 
@@ -822,11 +852,11 @@ void Sdlinti()
 
     // intialization of SDL
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_AUDIO) != 0)
-        return ;
+        return;
     if (TTF_Init() != 0)
     {
         SDL_Quit();
-        return ;
+        return;
     }
     // initialize music
     Mix_Init(MIX_INIT_MP3 | MIX_INIT_OGG);
@@ -837,7 +867,7 @@ void Sdlinti()
     {
         TTF_Quit();
         SDL_Quit();
-        return ;
+        return;
     }
 
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
@@ -846,7 +876,7 @@ void Sdlinti()
         SDL_DestroyWindow(window);
         TTF_Quit();
         SDL_Quit();
-        return ;
+        return;
     }
 
     font28 = TTF_OpenFont("fonts/Talk Comic.ttf", 28);
@@ -857,6 +887,6 @@ void Sdlinti()
         SDL_DestroyWindow(window);
         TTF_Quit();
         SDL_Quit();
-        return ;
+        return;
     }
 }
