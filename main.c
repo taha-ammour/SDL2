@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
         int correct_guesses = 0;
         bool guessed_letterss[word_length];
         memset(guessed_letterss, false, sizeof(guessed_letterss));
-        score = 100;
+        score = 0;
         while (SDL_PollEvent(&event))
         {
             switch (event.type)
@@ -190,27 +190,6 @@ int main(int argc, char *argv[])
                                         if (counter <= 0 || check_game_over(guessed_letterss, word_length) || incorrect_guesses >= diffinco)
                                         {
                                             set = 4; // exit options menu
-                                            switch (selected_options)
-                                            {
-                                            case EASY:
-                                                // Start game with Easy difficulty
-                                                counter = 6 * 60;
-                                                livesrem = 100 / 9;
-                                                diffinco = 9;
-                                                break;
-                                            case MED:
-                                                // Start game with Medium difficulty
-                                                counter = 4 * 60;
-                                                livesrem = 100 / 6;
-                                                diffinco = 6;
-                                                break;
-                                            case HARD:
-                                                // Start game with Hard difficulty
-                                                counter = 2 * 60;
-                                                livesrem = 100 / 3;
-                                                diffinco = 3;
-                                                break;
-                                            }
                                             ignore_up_down_events = false;
                                         }
                                         break;
@@ -266,6 +245,9 @@ int main(int argc, char *argv[])
                                                     Mix_PlayChannel(-1, FALSEWAV, 0);
 
                                                     score -= livesrem;
+                                                    if(score <= 0){
+                                                        score = 0;
+                                                    }
                                                 }
                                                 else if (found_letter && !check_game_over(guessed_letterss, word_length))
                                                 {
@@ -273,6 +255,7 @@ int main(int argc, char *argv[])
                                                     correct_guesses++;
                                                     score += livesrem;
                                                 }
+
                                             }
                                         }
                                     }
