@@ -104,19 +104,11 @@ int main(int argc, char *argv[])
     int diffinco = 9;
     while (!quit)
     {
-        int word_index = rand() % WORD_LIST_SIZE;
-        char *word = word_list[word_index];
-        int word_length = strlen(word);
-        char incorrect_guesses_letters[9];
-        char correct_guesses_letters[100];
-        memset(incorrect_guesses_letters, 0, sizeof(incorrect_guesses_letters));
-        memset(correct_guesses_letters, 0, sizeof(correct_guesses_letters));
+        
 
         // Initialize the game variables
         int incorrect_guesses = 0;
         int correct_guesses = 0;
-        bool guessed_letterss[word_length];
-        memset(guessed_letterss, false, sizeof(guessed_letterss));
         score = 0;
         while (SDL_PollEvent(&event))
         {
@@ -158,8 +150,8 @@ int main(int argc, char *argv[])
                         Mix_PlayChannel(-1, HIT, 0);
                         // Handle start game
                         printf("nop");
-                    s:
-                        word_index = rand() % WORD_LIST_SIZE;
+                        s:
+                        int word_index = rand() % WORD_LIST_SIZE;
                         char *word = word_list[word_index];
                         int word_length = strlen(word);
                         char incorrect_guesses_letters[9];
@@ -169,7 +161,8 @@ int main(int argc, char *argv[])
 
                         // Initialize the game variables
                         int correct_guesses = 0;
-                        memset(guessed_letterss, false, sizeof(guessed_letterss));
+                        bool* guessed_letterss = malloc(word_length * sizeof(bool));
+                        memset(guessed_letterss, false,word_length * sizeof(bool));
                         set = 0;
                         while (set == 0)
                         {
@@ -279,21 +272,25 @@ int main(int argc, char *argv[])
                                 if (counter <= 0)
                                 {
                                     sprintf(timer_text, "Time's up!");
+                                    free(guessed_letterss);
                                 }
                                 else if (check_game_over(guessed_letterss, word_length))
                                 {
+                                    free(guessed_letterss);
                                     goto s;
                                 }
                                 else if (incorrect_guesses >= diffinco)
                                 {
                                     sprintf(timer_text, "Out of tries!");
+                                    free(guessed_letterss);
                                 }
 
                                 draw_txt(font38, timer_text, 100, 100);
                                 score_txt(font38, score, WINDOW_WIDTH / 2 - 110, WINDOW_HEIGHT / 2);
                             }
+                            
                         }
-
+                        
                         break;
                     case MENU_OPTIONS:
                         // handle options
