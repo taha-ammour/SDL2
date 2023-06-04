@@ -12,6 +12,7 @@
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 500
 
+
 SDL_Color white = {255, 255, 255};
 SDL_Color black = {0, 0, 0};
 
@@ -30,9 +31,8 @@ SDL_Renderer *renderer;
 #define MENU_START_GAME 0
 #define MENU_OPTIONS 1
 #define MENU_QUIT 2
-#define WORD_LIST_SIZE 10
+#define MAX_WORD_LENGTH 100
 
-char *word_list[WORD_LIST_SIZE] = {"hangman", "computer", "keyboard", "mouse", "monitor", "printer", "scanner", "software", "hardware", "database"};
 
 bool fmenu = true;
 int set = MAIN_MENU;
@@ -54,6 +54,7 @@ enum Difficulty
 // function intialisation
 // TODO: MAKE the function for the hangman and apply words based on difficulty
 void Sdlinti();
+char* getRandomWord(const char* filename);
 void score_txt(TTF_Font *font, int score, int x, int y);
 Uint32 timer_callback(Uint32 interval, void *param);
 void draw_menu(TTF_Font *font38, int selected_item, int selected_options);
@@ -79,11 +80,8 @@ int main(int argc, char *argv[])
 {
 
     Sdlinti();
-
-    // Randomly select a word from the word list
     srand(time(NULL));
 
-    // import sounds
     Clicksound = Mix_LoadWAV("res/sfx/Click.wav");
     HIT = Mix_LoadWAV("res/sfx/hit.wav");
     Clicksound2 = Mix_LoadWAV("res/sfx/Click2.wav");
@@ -104,7 +102,6 @@ int main(int argc, char *argv[])
     int diffinco = 9;
     while (!quit)
     {
-        
 
         // Initialize the game variables
         int incorrect_guesses = 0;
@@ -151,8 +148,7 @@ int main(int argc, char *argv[])
                         // Handle start game
                         printf("nop");
                         s:
-                        int word_index = rand() % WORD_LIST_SIZE;
-                        char *word = word_list[word_index];
+                        char *word = getRandomWord("res/textfiles/EASY.txt");
                         int word_length = strlen(word);
                         char incorrect_guesses_letters[9];
                         char correct_guesses_letters[100];
@@ -272,7 +268,7 @@ int main(int argc, char *argv[])
                                 if (counter <= 0)
                                 {
                                     sprintf(timer_text, "Time's up!");
-                                    free(guessed_letterss);
+                                    
                                 }
                                 else if (check_game_over(guessed_letterss, word_length))
                                 {
@@ -282,7 +278,7 @@ int main(int argc, char *argv[])
                                 else if (incorrect_guesses >= diffinco)
                                 {
                                     sprintf(timer_text, "Out of tries!");
-                                    free(guessed_letterss);
+                                    
                                 }
 
                                 draw_txt(font38, timer_text, 100, 100);
@@ -869,4 +865,24 @@ void Sdlinti()
         SDL_Quit();
         return;
     }
+}
+char* getRandomWord(const char* filename) {
+    FILE* file = fopen(filename, "r");
+    if (file == NULL) {
+        printf("Error opening file.\n");
+        return NULL;
+    }
+
+    char word[MAX_WORD_LENGTH];
+    char* randomWord = NULL;
+    int count = 0;
+
+    while (fscanf(file, "%s", word) == 1) {
+        if (rand() % (++count) == 0) {
+            randomWord = strdup(word);
+        }
+    }
+
+    fclose(file);
+    return randomWord;
 }
