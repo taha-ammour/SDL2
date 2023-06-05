@@ -12,7 +12,6 @@
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 500
 
-
 SDL_Color white = {255, 255, 255};
 SDL_Color black = {0, 0, 0};
 
@@ -23,6 +22,8 @@ Mix_Chunk *Clicksound;
 Mix_Chunk *Clicksound2;
 Mix_Chunk *HIT;
 Mix_Chunk *FALSEWAV;
+Mix_Chunk *TRUEWAV;
+Mix_Chunk *Reset_sound;
 
 SDL_Window *window;
 SDL_Renderer *renderer;
@@ -32,7 +33,6 @@ SDL_Renderer *renderer;
 #define MENU_OPTIONS 1
 #define MENU_QUIT 2
 #define MAX_WORD_LENGTH 100
-
 
 bool fmenu = true;
 int set = MAIN_MENU;
@@ -54,7 +54,7 @@ enum Difficulty
 // function intialisation
 // TODO: MAKE the function for the hangman and apply words based on difficulty
 void Sdlinti();
-char* getRandomWord(const char* filename);
+char *getRandomWord(const char *filename);
 void score_txt(TTF_Font *font, int score, int x, int y);
 Uint32 timer_callback(Uint32 interval, void *param);
 void draw_menu(TTF_Font *font38, int selected_item, int selected_options);
@@ -64,6 +64,7 @@ void draw_options(TTF_Font *font38, int selected_options);
 void draw_tries(TTF_Font *font, int selected_options, int try);
 void drawHangman(int wrongGuesses, int selected_options);
 bool check_game_over(bool *guessed_letters, int word_length);
+void draw_admin(TTF_Font *font, bool istrue, char *word);
 // Timer callback function
 Uint32 timer_callback(Uint32 interval, void *param)
 {
@@ -82,11 +83,6 @@ int main(int argc, char *argv[])
     Sdlinti();
     srand(time(NULL));
 
-    Clicksound = Mix_LoadWAV("res/sfx/Click.wav");
-    HIT = Mix_LoadWAV("res/sfx/hit.wav");
-    Clicksound2 = Mix_LoadWAV("res/sfx/Click2.wav");
-    FALSEWAV = Mix_LoadWAV("res/sfx/false.wav");
-
     int selected_item = MENU_START_GAME;
     enum Difficulty selected_options;
     selected_options = EASY;
@@ -100,6 +96,7 @@ int main(int argc, char *argv[])
     char timer_text[32];
     livesrem = 100 / 9;
     int diffinco = 9;
+
     while (!quit)
     {
 
@@ -147,18 +144,17 @@ int main(int argc, char *argv[])
                         Mix_PlayChannel(-1, HIT, 0);
                         // Handle start game
                         printf("nop");
-                        s:
+                    s:
                         char *word = getRandomWord("res/textfiles/EASY.txt");
                         int word_length = strlen(word);
                         char incorrect_guesses_letters[9];
                         char correct_guesses_letters[100];
                         memset(incorrect_guesses_letters, 0, sizeof(incorrect_guesses_letters));
                         memset(correct_guesses_letters, 0, sizeof(correct_guesses_letters));
-
-                        // Initialize the game variables
+                        
                         int correct_guesses = 0;
-                        bool* guessed_letterss = malloc(word_length * sizeof(bool));
-                        memset(guessed_letterss, false,word_length * sizeof(bool));
+                        bool *guessed_letterss = malloc(word_length * sizeof(bool));
+                        memset(guessed_letterss, false, word_length * sizeof(bool));
                         set = 0;
                         while (set == 0)
                         {
@@ -179,6 +175,7 @@ int main(int argc, char *argv[])
                                         if (counter <= 0 || check_game_over(guessed_letterss, word_length) || incorrect_guesses >= diffinco)
                                         {
                                             set = 4; // exit options menu
+                                            Mix_PlayChannel(-1, Reset_sound, 0);
                                             ignore_up_down_events = false;
                                         }
                                         break;
@@ -233,18 +230,19 @@ int main(int argc, char *argv[])
                                                     incorrect_guesses++;
                                                     Mix_PlayChannel(-1, FALSEWAV, 0);
 
-                                                    score -= livesrem;
-                                                    if(score <= 0){
+                                                    score -= livesrem / 2;
+                                                    if (score <= 0)
+                                                    {
                                                         score = 0;
                                                     }
                                                 }
-                                                else if (found_letter && !check_game_over(guessed_letterss, word_length))
+                                                else if (found_letter)
                                                 {
                                                     correct_guesses_letters[correct_guesses] = letter;
                                                     correct_guesses++;
                                                     score += livesrem;
+                                                    Mix_PlayChannel(-1, TRUEWAV, 0);
                                                 }
-
                                             }
                                         }
                                     }
@@ -257,8 +255,9 @@ int main(int argc, char *argv[])
                             {
                                 sprintf(timer_text, "%02d:%02d", counter / 60, counter % 60);
                                 draw_txt(font28, timer_text, 0, 0);
-                                score_txt(font28, score, WINDOW_WIDTH - 170, 0);
+                                score_txt(font28, score, WINDOW_WIDTH - 200, 0);
                                 draw_txt_g(font28, word, guessed_letterss);
+                                draw_admin(font28, true, word);
                                 draw_tries(font28, selected_options, incorrect_guesses);
                                 drawHangman(incorrect_guesses, selected_options);
                                 SDL_Delay(16);
@@ -268,7 +267,6 @@ int main(int argc, char *argv[])
                                 if (counter <= 0)
                                 {
                                     sprintf(timer_text, "Time's up!");
-                                    
                                 }
                                 else if (check_game_over(guessed_letterss, word_length))
                                 {
@@ -278,15 +276,13 @@ int main(int argc, char *argv[])
                                 else if (incorrect_guesses >= diffinco)
                                 {
                                     sprintf(timer_text, "Out of tries!");
-                                    
                                 }
 
                                 draw_txt(font38, timer_text, 100, 100);
                                 score_txt(font38, score, WINDOW_WIDTH / 2 - 110, WINDOW_HEIGHT / 2);
                             }
-                            
                         }
-                        
+
                         break;
                     case MENU_OPTIONS:
                         // handle options
@@ -422,7 +418,7 @@ void draw_menu(TTF_Font *font38, int selected_item, int selected_options)
     SDL_FreeSurface(text_surface);
     SDL_DestroyTexture(text_texture);
     // difficulty level
-    char text_difficulty[32];
+    char text_difficulty[100];
     sprintf(text_difficulty, "Difficulty : %s", (selected_options == EASY) ? " Easy" : ((selected_options == MED) ? "Medium" : "Hard"));
     text_surface = TTF_RenderText_Blended(font28, text_difficulty, color);
     text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
@@ -538,7 +534,7 @@ void draw_options(TTF_Font *font38, int selected_options)
 void score_txt(TTF_Font *font, int score, int x, int y)
 {
 
-    char score_str[32];
+    char score_str[100];
     sprintf(score_str, "Score: %d", score);
 
     SDL_Color color = {255, 255, 255, 255};
@@ -796,6 +792,7 @@ void draw_txt_g(TTF_Font *font, const char *text, bool *guessed_letters)
         x += 30;
     }
 }
+
 bool check_game_over(bool *guessed_letters, int word_length)
 {
     for (int i = 0; i < word_length; i++)
@@ -807,6 +804,7 @@ bool check_game_over(bool *guessed_letters, int word_length)
     }
     return true;
 }
+
 void draw_tries(TTF_Font *font, int selected_options, int try)
 {
     char try_str[32];
@@ -823,6 +821,7 @@ void draw_tries(TTF_Font *font, int selected_options, int try)
     SDL_DestroyTexture(texture);
     SDL_FreeSurface(surface);
 }
+
 void Sdlinti()
 {
 
@@ -837,6 +836,14 @@ void Sdlinti()
     // initialize music
     Mix_Init(MIX_INIT_MP3 | MIX_INIT_OGG);
     Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
+
+    Clicksound = Mix_LoadWAV("res/sfx/Click.wav");
+    HIT = Mix_LoadWAV("res/sfx/hit.wav");
+    Clicksound2 = Mix_LoadWAV("res/sfx/Click2.wav");
+    FALSEWAV = Mix_LoadWAV("res/sfx/false.wav");
+    TRUEWAV = Mix_LoadWAV("res/sfx/found.wav");
+    Reset_sound = Mix_LoadWAV("res/sfx/reset.wav");
+
     // create window
     window = SDL_CreateWindow("Hangman", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
     if (!window)
@@ -866,23 +873,58 @@ void Sdlinti()
         return;
     }
 }
-char* getRandomWord(const char* filename) {
-    FILE* file = fopen(filename, "r");
-    if (file == NULL) {
+
+char *getRandomWord(const char *filename)
+{
+    FILE *file = fopen(filename, "r");
+    if (file == NULL)
+    {
         printf("Error opening file.\n");
         return NULL;
     }
 
     char word[MAX_WORD_LENGTH];
-    char* randomWord = NULL;
+    char *randomWord = NULL;
     int count = 0;
 
-    while (fscanf(file, "%s", word) == 1) {
-        if (rand() % (++count) == 0) {
+    while (fscanf(file, "%s", word) == 1)
+    {
+        if (rand() % (++count) == 0)
+        {
             randomWord = strdup(word);
         }
     }
 
     fclose(file);
     return randomWord;
+}
+
+void draw_admin(TTF_Font *font, bool istrue, char *word)
+{
+
+    if (istrue)
+    {
+        SDL_Surface *surface = TTF_RenderText_Blended(font, "Admin: ", (SDL_Color){255, 10, 10, 255});
+        SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_Rect rect = {250, 360, surface->w, surface->h};
+        SDL_RenderCopy(renderer, texture, NULL, &rect);
+        SDL_FreeSurface(surface);
+        SDL_DestroyTexture(texture);
+
+        int x = 380;
+        int y = 360;
+        for (int i = 0; i < strlen(word); i++)
+        {
+
+            char letter[2] = {word[i], '\0'};
+            surface = TTF_RenderText_Blended(font, letter, (SDL_Color){255, 10, 10, 255});
+            texture = SDL_CreateTextureFromSurface(renderer, surface);
+            rect = (SDL_Rect){x, y, surface->w, surface->h};
+            SDL_RenderCopy(renderer, texture, NULL, &rect);
+            SDL_FreeSurface(surface);
+            SDL_DestroyTexture(texture);
+
+            x += 30;
+        }
+    }
 }
