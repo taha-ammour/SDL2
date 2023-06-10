@@ -19,7 +19,10 @@ SDL_Color black = {0, 0, 0};
 TTF_Font *font38;
 TTF_Font *font28;
 
-SDL_Surface* iconSurface;
+SDL_Texture *startexture;
+
+SDL_Surface *iconSurface;
+SDL_Surface *starsurface;
 
 Mix_Chunk *Clicksound;
 Mix_Chunk *Clicksound2;
@@ -39,7 +42,7 @@ SDL_Renderer *renderer;
 #define MAX_WORD_LENGTH 100
 
 bool fmenu = true;
-int set = MAIN_MENU;
+int set = ANIMMENU;
 int score = 100;
 
 const int easylivetry = 9;
@@ -74,7 +77,7 @@ void draw_tries(TTF_Font *font, int selected_options, int try);
 void drawHangman(int wrongGuesses, int selected_options);
 bool check_game_over(bool *guessed_letters, int word_length);
 void draw_admin(TTF_Font *font, bool istrue, char *word);
-void updateStars(Star stars[]);
+void updateStars(Star* stars);
 // Timer callback function
 Uint32 timer_callback(Uint32 interval, void *param)
 {
@@ -92,7 +95,6 @@ int main(int argc, char *argv[])
 
     Sdlinti();
     srand(time(NULL));
-
 
     int selected_item = MENU_START_GAME;
     Difficulty selected_options;
@@ -115,10 +117,37 @@ int main(int argc, char *argv[])
         stars[i].y = rand() % WINDOW_HEIGHT;
         stars[i].speed = 1 + rand() % 3;
     }
+
+    startexture = SDL_CreateTextureFromSurface(renderer, starsurface);
+    SDL_FreeSurface(starsurface);
+
     SDL_SetWindowIcon(window, iconSurface);
     SDL_FreeSurface(iconSurface);
     while (!quit)
     {
+
+        if (set == ANIMMENU)
+        {
+            updateStars(stars);
+            if (SDL_PollEvent(&event))
+            {
+                if (event.type == SDL_QUIT)
+                {
+                    quit = 1;
+                }
+                
+            }
+            
+            for (int i = 0; i < 100; i++)
+            {
+                
+                SDL_Rect starRect = {stars[i].x, stars[i].y, 4, 4};
+                SDL_RenderCopy(renderer, startexture, NULL, &starRect);
+            }
+            SDL_RenderPresent(renderer);
+            SDL_Delay(10);
+            
+        }
 
         // Initialize the game variables
         int incorrect_guesses = 0;
@@ -405,6 +434,7 @@ int main(int argc, char *argv[])
     }
 
     // Clean up and exit
+    SDL_DestroyTexture(startexture);
     SDL_RemoveTimer(timer_id);
     Mix_FreeChunk(Clicksound);
     Mix_CloseAudio();
@@ -863,6 +893,8 @@ void Sdlinti()
     FALSEWAV = Mix_LoadWAV("res/sfx/false.wav");
     TRUEWAV = Mix_LoadWAV("res/sfx/found.wav");
     Reset_sound = Mix_LoadWAV("res/sfx/reset.wav");
+
+    starsurface = IMG_Load("res/gfx/star.png");
     iconSurface = IMG_Load("res/gfx/player.png");
 
     // create window
@@ -949,7 +981,7 @@ void draw_admin(TTF_Font *font, bool istrue, char *word)
         }
     }
 }
-void updateStars(Star stars[])
+void updateStars(Star* stars)
 {
     for (int i = 0; i < 100; i++)
     {
