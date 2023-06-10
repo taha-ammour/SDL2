@@ -3,6 +3,7 @@
 #include <SDL2/SDL_ttf.h>
 #include <stdbool.h>
 #include <SDL2/SDL_mixer.h>
+#include <SDL2/SDL_image.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -18,6 +19,8 @@ SDL_Color black = {0, 0, 0};
 TTF_Font *font38;
 TTF_Font *font28;
 
+SDL_Surface* iconSurface;
+
 Mix_Chunk *Clicksound;
 Mix_Chunk *Clicksound2;
 Mix_Chunk *HIT;
@@ -28,6 +31,7 @@ Mix_Chunk *Reset_sound;
 SDL_Window *window;
 SDL_Renderer *renderer;
 
+#define ANIMMENU 5
 #define MAIN_MENU 4
 #define MENU_START_GAME 0
 #define MENU_OPTIONS 1
@@ -44,12 +48,17 @@ const int hardlivetry = 3;
 
 int livesrem;
 
-enum Difficulty
+typedef enum
 {
     EASY,
     MED,
     HARD
-};
+} Difficulty;
+typedef struct
+{
+    int x, y;
+    int speed;
+} Star;
 
 // function intialisation
 // TODO: MAKE the function for the hangman and apply words based on difficulty
@@ -65,6 +74,7 @@ void draw_tries(TTF_Font *font, int selected_options, int try);
 void drawHangman(int wrongGuesses, int selected_options);
 bool check_game_over(bool *guessed_letters, int word_length);
 void draw_admin(TTF_Font *font, bool istrue, char *word);
+void updateStars(Star stars[]);
 // Timer callback function
 Uint32 timer_callback(Uint32 interval, void *param)
 {
@@ -83,20 +93,30 @@ int main(int argc, char *argv[])
     Sdlinti();
     srand(time(NULL));
 
+
     int selected_item = MENU_START_GAME;
-    enum Difficulty selected_options;
+    Difficulty selected_options;
     selected_options = EASY;
     int counter = 6 * 60; // 6 minutes
 
     SDL_TimerID timer_id = SDL_AddTimer(1000, timer_callback, &counter);
     SDL_Event event;
     bool quit = false;
-    bool ignore_up_down_events = false;
+    bool ignore_up_down_events = true;
     bool timer_started = false;
     char timer_text[32];
     livesrem = 100 / 9;
     int diffinco = 9;
 
+    Star stars[100];
+    for (int i = 0; i < 100; i++)
+    {
+        stars[i].x = rand() % WINDOW_WIDTH;
+        stars[i].y = rand() % WINDOW_HEIGHT;
+        stars[i].speed = 1 + rand() % 3;
+    }
+    SDL_SetWindowIcon(window, iconSurface);
+    SDL_FreeSurface(iconSurface);
     while (!quit)
     {
 
@@ -151,7 +171,7 @@ int main(int argc, char *argv[])
                         char correct_guesses_letters[100];
                         memset(incorrect_guesses_letters, 0, sizeof(incorrect_guesses_letters));
                         memset(correct_guesses_letters, 0, sizeof(correct_guesses_letters));
-                        
+
                         int correct_guesses = 0;
                         bool *guessed_letterss = malloc(word_length * sizeof(bool));
                         memset(guessed_letterss, false, word_length * sizeof(bool));
@@ -843,6 +863,7 @@ void Sdlinti()
     FALSEWAV = Mix_LoadWAV("res/sfx/false.wav");
     TRUEWAV = Mix_LoadWAV("res/sfx/found.wav");
     Reset_sound = Mix_LoadWAV("res/sfx/reset.wav");
+    iconSurface = IMG_Load("res/gfx/player.png");
 
     // create window
     window = SDL_CreateWindow("Hangman", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
@@ -925,6 +946,19 @@ void draw_admin(TTF_Font *font, bool istrue, char *word)
             SDL_DestroyTexture(texture);
 
             x += 30;
+        }
+    }
+}
+void updateStars(Star stars[])
+{
+    for (int i = 0; i < 100; i++)
+    {
+        stars[i].y += stars[i].speed;
+
+        if (stars[i].y >= WINDOW_HEIGHT)
+        {
+            stars[i].y = 0;
+            stars[i].x = rand() % WINDOW_WIDTH;
         }
     }
 }
