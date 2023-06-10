@@ -135,6 +135,16 @@ int main(int argc, char *argv[])
                 {
                     quit = 1;
                 }
+                if (event.type == SDL_KEYDOWN)
+                {
+                    if (event.key.keysym.sym == SDLK_SPACE)
+                    {
+                        set = MAIN_MENU;
+                        ignore_up_down_events = false;
+                    }
+                    
+                }
+                
                 
             }
             
