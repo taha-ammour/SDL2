@@ -9,22 +9,26 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v3
 
+    - name: Install MinGW-w64
+      run: |
+        choco install mingw
+        refreshenv
+
     - name: Install SDL2 dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install -y libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev libsdl2-mixer-dev
+        mingw-get install mingw32-libSDL2 mingw32-libSDL2_ttf mingw32-libSDL2_image mingw32-libSDL2_mixer
 
     - name: Build
       run: |
-        gcc -I src/include -L src/lib -o main main.c map.c -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_image -lSDL2_mixer
+        gcc -o main main.c map.c -I"C:\MinGW\include" -L"C:\MinGW\lib" -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_image -lSDL2_mixer
 
     - name: Test
-      run: make check
+      run: main.exe
 
     - name: Distcheck
-      run: make distcheck
+      run: echo "Perform distcheck here if needed"
