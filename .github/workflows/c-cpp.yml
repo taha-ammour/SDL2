@@ -21,7 +21,7 @@ jobs:
 
     - name: Build
       run: |
-        gcc -I src/include -L src/lib -o main main.c map.c -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_image -lSDL2_mixer
+        gcc -I src/include -L src/lib -o main main.c -lmingw32 map.c -lSDL2main -lSDL2 -lSDL2_TTf -lSDL2_image -lSDL2_mixer
 
     - name: Test
       run: make check
