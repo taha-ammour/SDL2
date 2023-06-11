@@ -20,7 +20,9 @@ TTF_Font *font38;
 TTF_Font *font28;
 
 SDL_Texture *startexture;
+SDL_Texture *rockTexture;
 
+SDL_Surface *rocksurface;
 SDL_Surface *iconSurface;
 SDL_Surface *starsurface;
 
@@ -61,6 +63,12 @@ typedef struct
     int x, y;
     int speed;
 } Star;
+typedef struct {
+    int x;
+    int y;
+    float speed;
+    float size;
+} Rock;
 
 // function intialisation
 // TODO: MAKE the function for the hangman and apply words based on difficulty
@@ -77,6 +85,8 @@ void drawHangman(int wrongGuesses, int selected_options);
 bool check_game_over(bool *guessed_letters, int word_length);
 void draw_admin(TTF_Font *font, bool istrue, char *word);
 void updateStars(Star *stars);
+void initRocks(Rock *rocks);
+void updateRocks(Rock *rocks);
 // Timer callback function
 Uint32 timer_callback(Uint32 interval, void *param)
 {
@@ -116,8 +126,13 @@ int main(int argc, char *argv[])
         stars[i].y = rand() % WINDOW_HEIGHT;
         stars[i].speed = 1 + rand() % 3;
     }
-
+    Rock rocks[100];
+    initRocks(rocks);
     startexture = SDL_CreateTextureFromSurface(renderer, starsurface);
+    SDL_FreeSurface(starsurface);
+
+    rockTexture = SDL_CreateTextureFromSurface(renderer, rocksurface);
+    SDL_FreeSurface(rocksurface);
 
     SDL_SetWindowIcon(window, iconSurface);
     SDL_FreeSurface(iconSurface);
@@ -407,6 +422,7 @@ int main(int argc, char *argv[])
 
             draw_menu(font38, selected_item, selected_options);
             updateStars(stars);
+            updateRocks(rocks);
             SDL_Delay(20);
         }
 
@@ -415,7 +431,6 @@ int main(int argc, char *argv[])
 
     // Clean up and exit
     SDL_DestroyTexture(startexture);
-    SDL_FreeSurface(starsurface);
     SDL_RemoveTimer(timer_id);
     Mix_FreeChunk(Clicksound);
     Mix_CloseAudio();
@@ -893,6 +908,7 @@ void Sdlinti()
 
     starsurface = IMG_Load("res/gfx/star.png");
     iconSurface = IMG_Load("res/gfx/player.png");
+    rocksurface = IMG_Load("res/gfx/spacerock.png");
 
     // create window
     window = SDL_CreateWindow("Hangman", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
@@ -1009,5 +1025,30 @@ void updateStars(Star *stars)
 
         SDL_Rect starRect = {stars[i].x, stars[i].y, 4, 4};
         SDL_RenderCopy(renderer, startexture, NULL, &starRect);
+    }
+}
+void initRocks(Rock *rocks){
+    for (int i = 0; i < 100; i++) {
+        rocks[i].x = (i % 2 == 0) ? 0 : 740;  // Alternate between left and right side
+        rocks[i].y = rand()% WINDOW_HEIGHT + 1;  // Random starting y position
+        rocks[i].speed = rand() % 5 + 1;  // Random speed between 1 and 5
+        rocks[i].size = rand() % 20 + 10;  // Random size between 10 and 30
+    }
+}
+void updateRocks(Rock *rocks){
+    for (int i = 0; i < 100; i++) {
+        if (rocks[i].y < 0 || rocks[i].y >= WINDOW_HEIGHT) {
+            // If rock reaches the left or right edge, reset its position
+            rocks[i].x = (i % 2 == 0) ? 0 : 770;
+            rocks[i].y = 0;
+            rocks[i].speed = rand() % 5 + 1;
+            rocks[i].size = rand() % 20 + 10;
+        } else {
+            rocks[i].y += rocks[i].speed; 
+        }
+    }
+    for (int i = 0; i < 100; i++) {
+        SDL_Rect rockRect = { rocks[i].x, rocks[i].y,3 * rocks[i].size, 3 * rocks[i].size };
+        SDL_RenderCopy(renderer, rockTexture, NULL, &rockRect);
     }
 }
