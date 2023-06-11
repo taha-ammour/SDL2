@@ -1,0 +1,74 @@
+name: Makefile CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Make
+      run: |
+        choco install make
+        refreshenv
+
+    - name: Set up SDL2
+      run: |
+        choco install mingw
+        refreshenv
+        mingw32-make -v
+        git clone https://github.com/libsdl-org/SDL.git
+        cd SDL
+        mkdir build
+        cd build
+        ../configure
+        mingw32-make
+        mingw32-make install
+
+    - name: Set up SDL2_image
+      run: |
+        git clone https://github.com/libsdl-org/SDL_image.git
+        cd SDL_image
+        mkdir build
+        cd build
+        ../configure
+        mingw32-make
+        mingw32-make install
+
+    - name: Set up SDL2_ttf
+      run: |
+        git clone https://github.com/libsdl-org/SDL_ttf.git
+        cd SDL_ttf
+        mkdir build
+        cd build
+        ../configure
+        mingw32-make
+        mingw32-make install
+
+    - name: Set up SDL2_mixer
+      run: |
+        git clone https://github.com/libsdl-org/SDL_mixer.git
+        cd SDL_mixer
+        mkdir build
+        cd build
+        ../configure
+        mingw32-make
+        mingw32-make install
+
+    - name: Configure
+      run: .\configure
+
+    - name: Install dependencies
+      run: make
+
+    - name: Run check
+      run: make check
+
+    - name: Run distcheck
+      run: make distcheck
