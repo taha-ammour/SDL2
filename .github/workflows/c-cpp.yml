@@ -17,25 +17,11 @@ jobs:
     - name: Install SDL2 dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libsdl2-dev
-
-    - name: Install SDL2_TTF dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y libsdl2-ttf-dev
-
-    - name: Install SDL2_image dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y libsdl2-image-dev
-
-    - name: Install SDL2_mixer dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y libsdl2-mixer-dev
+        sudo apt-get install -y libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev libsdl2-mixer-dev
 
     - name: Build
-      run: make
+      run: |
+        gcc -I src/include -L src/lib -o main main.c map.c -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_image -lSDL2_mixer
 
     - name: Test
       run: make check
