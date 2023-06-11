@@ -14,18 +14,13 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Install MinGW-w64
-      run: |
-        choco install mingw
-        refreshenv
-
     - name: Install SDL2 dependencies
       run: |
-        mingw-get install mingw32-libSDL2 mingw32-libSDL2_ttf mingw32-libSDL2_image mingw32-libSDL2_mixer
+        pacman -S --noconfirm mingw-w64-x86_64-SDL2 mingw-w64-x86_64-SDL2_ttf mingw-w64-x86_64-SDL2_image mingw-w64-x86_64-SDL2_mixer
 
     - name: Build
       run: |
-        gcc -o main main.c map.c -I"C:\MinGW\include" -L"C:\MinGW\lib" -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_image -lSDL2_mixer
+        gcc -o main main.c map.c -I"/mingw64/include" -L"/mingw64/lib" -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_image -lSDL2_mixer
 
     - name: Test
       run: main.exe
