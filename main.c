@@ -34,7 +34,6 @@ Mix_Chunk *Reset_sound;
 SDL_Window *window;
 SDL_Renderer *renderer;
 
-#define ANIMMENU 5
 #define MAIN_MENU 4
 #define MENU_START_GAME 0
 #define MENU_OPTIONS 1
@@ -42,7 +41,7 @@ SDL_Renderer *renderer;
 #define MAX_WORD_LENGTH 100
 
 bool fmenu = true;
-int set = ANIMMENU;
+int set = MAIN_MENU;
 int score = 100;
 
 const int easylivetry = 9;
@@ -77,7 +76,7 @@ void draw_tries(TTF_Font *font, int selected_options, int try);
 void drawHangman(int wrongGuesses, int selected_options);
 bool check_game_over(bool *guessed_letters, int word_length);
 void draw_admin(TTF_Font *font, bool istrue, char *word);
-void updateStars(Star* stars);
+void updateStars(Star *stars);
 // Timer callback function
 Uint32 timer_callback(Uint32 interval, void *param)
 {
@@ -104,7 +103,7 @@ int main(int argc, char *argv[])
     SDL_TimerID timer_id = SDL_AddTimer(1000, timer_callback, &counter);
     SDL_Event event;
     bool quit = false;
-    bool ignore_up_down_events = true;
+    bool ignore_up_down_events = false;
     bool timer_started = false;
     char timer_text[32];
     livesrem = 100 / 9;
@@ -119,45 +118,11 @@ int main(int argc, char *argv[])
     }
 
     startexture = SDL_CreateTextureFromSurface(renderer, starsurface);
-    SDL_FreeSurface(starsurface);
 
     SDL_SetWindowIcon(window, iconSurface);
     SDL_FreeSurface(iconSurface);
     while (!quit)
     {
-
-        if (set == ANIMMENU)
-        {
-            updateStars(stars);
-            if (SDL_PollEvent(&event))
-            {
-                if (event.type == SDL_QUIT)
-                {
-                    quit = 1;
-                }
-                if (event.type == SDL_KEYDOWN)
-                {
-                    if (event.key.keysym.sym == SDLK_SPACE)
-                    {
-                        set = MAIN_MENU;
-                        ignore_up_down_events = false;
-                    }
-                    
-                }
-                
-                
-            }
-            
-            for (int i = 0; i < 100; i++)
-            {
-                
-                SDL_Rect starRect = {stars[i].x, stars[i].y, 4, 4};
-                SDL_RenderCopy(renderer, startexture, NULL, &starRect);
-            }
-            SDL_RenderPresent(renderer);
-            SDL_Delay(10);
-            
-        }
 
         // Initialize the game variables
         int incorrect_guesses = 0;
@@ -314,6 +279,7 @@ int main(int argc, char *argv[])
                             {
                                 sprintf(timer_text, "%02d:%02d", counter / 60, counter % 60);
                                 draw_txt(font28, timer_text, 0, 0);
+                                updateStars(stars);
                                 score_txt(font28, score, WINDOW_WIDTH - 200, 0);
                                 draw_txt_g(font28, word, guessed_letterss);
                                 draw_admin(font28, true, word);
@@ -351,6 +317,7 @@ int main(int argc, char *argv[])
                         while (set == 1)
                         {
                             draw_options(font38, selected_options); // draw the options menu and highlight the selected difficulty
+                            updateStars(stars);
                             SDL_RenderPresent(renderer);
                             while (SDL_PollEvent(&event))
                             {
@@ -437,7 +404,10 @@ int main(int argc, char *argv[])
 
         if (set == MAIN_MENU)
         {
+
             draw_menu(font38, selected_item, selected_options);
+            updateStars(stars);
+            SDL_Delay(20);
         }
 
         SDL_RenderPresent(renderer);
@@ -445,6 +415,7 @@ int main(int argc, char *argv[])
 
     // Clean up and exit
     SDL_DestroyTexture(startexture);
+    SDL_FreeSurface(starsurface);
     SDL_RemoveTimer(timer_id);
     Mix_FreeChunk(Clicksound);
     Mix_CloseAudio();
@@ -540,17 +511,14 @@ void draw_txt(TTF_Font *font, const char *text, int x, int y)
 void draw_options(TTF_Font *font38, int selected_options)
 {
     SDL_Color color = {255, 255, 255, 255};
-    SDL_Surface *text_surface;
-    SDL_Texture *text_texture;
     SDL_Rect text_rect;
-
     // Clear the renderer
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 
-    // Draw the Difficulty tittle
-    text_surface = TTF_RenderText_Blended(font38, "Difficulty Level", color);
-    text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
+    // Draw the Difficulty title
+    SDL_Surface *text_surface = TTF_RenderText_Blended(font38, "Difficulty Level", color);
+    SDL_Texture *text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
     text_rect.x = 230;
     text_rect.y = 50;
     text_rect.w = text_surface->w;
@@ -571,6 +539,9 @@ void draw_options(TTF_Font *font38, int selected_options)
     text_rect.h = text_surface->h;
     SDL_RenderCopy(renderer, text_texture, NULL, &text_rect);
 
+    SDL_FreeSurface(text_surface);
+    SDL_DestroyTexture(text_texture);
+
     text_surface = TTF_RenderText_Blended(font38, med_text, (selected_options == MED) ? color : (SDL_Color){128, 128, 128, 255});
     text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
     text_rect.x = 50;
@@ -578,6 +549,9 @@ void draw_options(TTF_Font *font38, int selected_options)
     text_rect.w = text_surface->w;
     text_rect.h = text_surface->h;
     SDL_RenderCopy(renderer, text_texture, NULL, &text_rect);
+
+    SDL_FreeSurface(text_surface);
+    SDL_DestroyTexture(text_texture);
 
     text_surface = TTF_RenderText_Blended(font38, hard_text, (selected_options == HARD) ? color : (SDL_Color){128, 128, 128, 255});
     text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
@@ -593,7 +567,6 @@ void draw_options(TTF_Font *font38, int selected_options)
 
 void score_txt(TTF_Font *font, int score, int x, int y)
 {
-
     char score_str[100];
     sprintf(score_str, "Score: %d", score);
 
@@ -601,8 +574,15 @@ void score_txt(TTF_Font *font, int score, int x, int y)
     SDL_Surface *surface = TTF_RenderText_Blended(font, score_str, color);
     SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
 
-    SDL_Rect dst_rect = {x, y, 0, 0};
-    SDL_QueryTexture(texture, NULL, NULL, &dst_rect.w, &dst_rect.h);
+    int text_width = surface->w;
+    int text_height = surface->h;
+
+    SDL_Rect dst_rect;
+    dst_rect.x = x;
+    dst_rect.y = y;
+    dst_rect.w = text_width;
+    dst_rect.h = text_height;
+
     SDL_RenderCopy(renderer, texture, NULL, &dst_rect);
 
     SDL_DestroyTexture(texture);
@@ -812,44 +792,51 @@ void drawHangman(int wrongGuesses, int selected_options)
         }
         break;
     }
-
-    SDL_RenderPresent(renderer);
 }
 
 void draw_txt_g(TTF_Font *font, const char *text, bool *guessed_letters)
 {
 
-    SDL_Surface *surface = TTF_RenderText_Blended(font, "Word: ", (SDL_Color){255, 255, 255, 255});
+    SDL_Color color = {255, 255, 255, 255};
+    SDL_Rect rect;
+    SDL_Surface *surface = TTF_RenderText_Blended(font, "Word: ", color);
     SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_Rect rect = {250, 400, surface->w, surface->h};
+    rect.x = 250;
+    rect.y = 400;
+    rect.w = surface->w;
+    rect.h = surface->h;
     SDL_RenderCopy(renderer, texture, NULL, &rect);
     SDL_FreeSurface(surface);
     SDL_DestroyTexture(texture);
 
     int x = 380;
     int y = 400;
+    int letter_width = 0;
+    int letter_height = 0;
     for (int i = 0; i < strlen(text); i++)
     {
         if (guessed_letters[i])
         {
             char letter[2] = {text[i], '\0'};
-            surface = TTF_RenderText_Blended(font, letter, (SDL_Color){255, 255, 255, 255});
-            texture = SDL_CreateTextureFromSurface(renderer, surface);
-            rect = (SDL_Rect){x, y, surface->w, surface->h};
-            SDL_RenderCopy(renderer, texture, NULL, &rect);
-            SDL_FreeSurface(surface);
-            SDL_DestroyTexture(texture);
+            surface = TTF_RenderText_Blended(font, letter, color);
         }
         else
         {
-            surface = TTF_RenderText_Blended(font, "_", (SDL_Color){255, 255, 255, 255});
-            texture = SDL_CreateTextureFromSurface(renderer, surface);
-            rect = (SDL_Rect){x, y, surface->w, surface->h};
-            SDL_RenderCopy(renderer, texture, NULL, &rect);
-            SDL_FreeSurface(surface);
-            SDL_DestroyTexture(texture);
+            surface = TTF_RenderText_Blended(font, "_", color);
         }
-        x += 30;
+
+        texture = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_QueryTexture(texture, NULL, NULL, &letter_width, &letter_height);
+        rect.x = x;
+        rect.y = y;
+        rect.w = letter_width;
+        rect.h = letter_height;
+        SDL_RenderCopy(renderer, texture, NULL, &rect);
+
+        SDL_FreeSurface(surface);
+        SDL_DestroyTexture(texture);
+
+        x += letter_width + 10; // Add some spacing between letters
     }
 }
 
@@ -967,31 +954,45 @@ void draw_admin(TTF_Font *font, bool istrue, char *word)
 
     if (istrue)
     {
-        SDL_Surface *surface = TTF_RenderText_Blended(font, "Admin: ", (SDL_Color){255, 10, 10, 255});
+        SDL_Color color = {255, 10, 10, 255};
+        SDL_Rect rect;
+
+        SDL_Surface *surface = TTF_RenderText_Blended(font, "Admin: ", color);
         SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
-        SDL_Rect rect = {250, 360, surface->w, surface->h};
+        rect.x = 250;
+        rect.y = 360;
+        rect.w = surface->w;
+        rect.h = surface->h;
         SDL_RenderCopy(renderer, texture, NULL, &rect);
         SDL_FreeSurface(surface);
         SDL_DestroyTexture(texture);
 
         int x = 380;
         int y = 360;
+        int letter_width = 0;
+        int letter_height = 0;
         for (int i = 0; i < strlen(word); i++)
         {
-
             char letter[2] = {word[i], '\0'};
-            surface = TTF_RenderText_Blended(font, letter, (SDL_Color){255, 10, 10, 255});
+            surface = TTF_RenderText_Blended(font, letter, color);
             texture = SDL_CreateTextureFromSurface(renderer, surface);
-            rect = (SDL_Rect){x, y, surface->w, surface->h};
+            SDL_QueryTexture(texture, NULL, NULL, &letter_width, &letter_height);
+
+            rect.x = x;
+            rect.y = y;
+            rect.w = letter_width;
+            rect.h = letter_height;
             SDL_RenderCopy(renderer, texture, NULL, &rect);
+
             SDL_FreeSurface(surface);
             SDL_DestroyTexture(texture);
 
-            x += 30;
+            x += letter_width + 10;
         }
     }
 }
-void updateStars(Star* stars)
+
+void updateStars(Star *stars)
 {
     for (int i = 0; i < 100; i++)
     {
@@ -1002,5 +1003,11 @@ void updateStars(Star* stars)
             stars[i].y = 0;
             stars[i].x = rand() % WINDOW_WIDTH;
         }
+    }
+    for (int i = 0; i < 100; i++)
+    {
+
+        SDL_Rect starRect = {stars[i].x, stars[i].y, 4, 4};
+        SDL_RenderCopy(renderer, startexture, NULL, &starRect);
     }
 }
