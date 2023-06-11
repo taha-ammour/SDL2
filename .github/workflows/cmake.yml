@@ -1,0 +1,75 @@
+name: CMake
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up CMake
+      run: |
+        choco install cmake
+        refreshenv
+
+    - name: Set up SDL2
+      run: |
+        choco install mingw
+        refreshenv
+        git clone https://github.com/libsdl-org/SDL.git
+        cd SDL
+        mkdir build
+        cd build
+        cmake ..
+        cmake --build .
+        cmake --install .
+
+    - name: Set up SDL2_ttf
+      run: |
+        git clone https://github.com/libsdl-org/SDL_ttf.git
+        cd SDL_ttf
+        mkdir build
+        cd build
+        cmake ..
+        cmake --build .
+        cmake --install .
+
+    - name: Set up SDL2_image
+      run: |
+        git clone https://github.com/libsdl-org/SDL_image.git
+        cd SDL_image
+        mkdir build
+        cd build
+        cmake ..
+        cmake --build .
+        cmake --install .
+
+    - name: Set up SDL2_mixer
+      run: |
+        git clone https://github.com/libsdl-org/SDL_mixer.git
+        cd SDL_mixer
+        mkdir build
+        cd build
+        cmake ..
+        cmake --build .
+        cmake --install .
+
+    - name: Configure CMake
+      run: cmake -B ${{github.workspace}}\build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}\build --config ${{env.BUILD_TYPE}}
+
+    - name: Test
+      working-directory: ${{github.workspace}}\build
+      run: ctest -C ${{env.BUILD_TYPE}}
