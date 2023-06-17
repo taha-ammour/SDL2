@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
         stars[i].y = rand() % WINDOW_HEIGHT;
         stars[i].speed = 1 + rand() % 3;
     }
-    Rock rocks[100];
+    Rock rocks[3];
     initRocks(rocks);
     startexture = SDL_CreateTextureFromSurface(renderer, starsurface);
     SDL_FreeSurface(starsurface);
@@ -1028,7 +1028,7 @@ void updateStars(Star *stars)
     }
 }
 void initRocks(Rock *rocks){
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 3; i++) {
         rocks[i].x = (i % 2 == 0) ? 0 : 740;  // Alternate between left and right side
         rocks[i].y = rand()% WINDOW_HEIGHT + 1;  // Random starting y position
         rocks[i].speed = rand() % 5 + 1;  // Random speed between 1 and 5
@@ -1036,7 +1036,7 @@ void initRocks(Rock *rocks){
     }
 }
 void updateRocks(Rock *rocks){
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 3; i++) {
         if (rocks[i].y < 0 || rocks[i].y >= WINDOW_HEIGHT) {
             // If rock reaches the left or right edge, reset its position
             rocks[i].x = (i % 2 == 0) ? 0 : 770;
@@ -1047,7 +1047,7 @@ void updateRocks(Rock *rocks){
             rocks[i].y += rocks[i].speed; 
         }
     }
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 3; i++) {
         SDL_Rect rockRect = { rocks[i].x, rocks[i].y,3 * rocks[i].size, 3 * rocks[i].size };
         SDL_RenderCopy(renderer, rockTexture, NULL, &rockRect);
     }
