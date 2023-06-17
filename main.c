@@ -63,7 +63,7 @@ typedef struct
     int x, y;
     int speed;
 } Star;
-typedef struct 
+typedef struct
 {
     int x;
     int y;
@@ -176,13 +176,13 @@ int main(int argc, char *argv[])
                     case SDLK_RETURN:
                         switch (selected_item)
                         {
-                            case MENU_START_GAME:
+                        case MENU_START_GAME:
                             set = MENU_START_GAME;
                             break;
-                            case MENU_OPTIONS:
+                        case MENU_OPTIONS:
                             set = MENU_OPTIONS;
                             break;
-                            case MENU_QUIT:
+                        case MENU_QUIT:
                             quit = true;
                             break;
                         }
@@ -200,18 +200,51 @@ int main(int argc, char *argv[])
                     quit = true;
                     break;
                 case SDL_KEYDOWN:
-                
-                break;
-                
+                    switch (event.key.keysym.sym)
+                    {
+                    case SDLK_ESCAPE:
+                        set = MAIN_MENU;
+                        Mix_PlayChannel(-1, HIT, 0);
+                        break;
+                    case SDLK_UP:
+                        // scrolling up in options menu
+                        selected_options--;
+                        if (selected_options < EASY || selected_options == -1)
+                        {
+                            selected_options = HARD;
+                        }
+                        Mix_PlayChannel(-1, Clicksound2, 0);
+
+                        break;
+                    case SDLK_DOWN:
+                        selected_options++;
+                        if (selected_options > HARD)
+                        {
+                            selected_options = EASY;
+                        }
+                        Mix_PlayChannel(-1, Clicksound2, 0);
+
+                        break;
+                    case SDLK_RETURN:
+                        
+                        Mix_PlayChannel(-1, HIT, 0);
+                    }
+                    break;
                 }
             }
-            
         }
         if (set == MAIN_MENU)
         {
             draw_menu(font38, selected_item, selected_options);
             SDL_RenderPresent(renderer);
         }
+        if (set == MENU_OPTIONS)
+        {
+            
+            draw_options(font38, selected_options);
+            SDL_RenderPresent(renderer);
+        }
+        
     }
 
     // Clean up and exit
