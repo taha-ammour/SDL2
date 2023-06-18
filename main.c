@@ -226,7 +226,7 @@ int main(int argc, char *argv[])
 
                         break;
                     case SDLK_RETURN:
-                        
+
                         Mix_PlayChannel(-1, HIT, 0);
                     }
                     break;
@@ -240,11 +240,9 @@ int main(int argc, char *argv[])
         }
         if (set == MENU_OPTIONS)
         {
-            
             draw_options(font38, selected_options);
             SDL_RenderPresent(renderer);
         }
-        
     }
 
     // Clean up and exit
@@ -345,6 +343,7 @@ void draw_options(TTF_Font *font38, int selected_options)
 {
     SDL_Color color = {255, 255, 255, 255};
     SDL_Rect text_rect;
+    
     // Clear the renderer
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
@@ -357,6 +356,8 @@ void draw_options(TTF_Font *font38, int selected_options)
     text_rect.w = text_surface->w;
     text_rect.h = text_surface->h;
     SDL_RenderCopy(renderer, text_texture, NULL, &text_rect);
+    SDL_DestroyTexture(text_texture);
+    SDL_FreeSurface(text_surface);
 
     // Draw the difficulty levels
     char easy_text[32], med_text[32], hard_text[32];
@@ -371,9 +372,8 @@ void draw_options(TTF_Font *font38, int selected_options)
     text_rect.w = text_surface->w;
     text_rect.h = text_surface->h;
     SDL_RenderCopy(renderer, text_texture, NULL, &text_rect);
-
-    SDL_FreeSurface(text_surface);
     SDL_DestroyTexture(text_texture);
+    SDL_FreeSurface(text_surface);
 
     text_surface = TTF_RenderText_Blended(font38, med_text, (selected_options == MED) ? color : (SDL_Color){128, 128, 128, 255});
     text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
@@ -382,9 +382,8 @@ void draw_options(TTF_Font *font38, int selected_options)
     text_rect.w = text_surface->w;
     text_rect.h = text_surface->h;
     SDL_RenderCopy(renderer, text_texture, NULL, &text_rect);
-
-    SDL_FreeSurface(text_surface);
     SDL_DestroyTexture(text_texture);
+    SDL_FreeSurface(text_surface);
 
     text_surface = TTF_RenderText_Blended(font38, hard_text, (selected_options == HARD) ? color : (SDL_Color){128, 128, 128, 255});
     text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
@@ -393,9 +392,8 @@ void draw_options(TTF_Font *font38, int selected_options)
     text_rect.w = text_surface->w;
     text_rect.h = text_surface->h;
     SDL_RenderCopy(renderer, text_texture, NULL, &text_rect);
-
-    SDL_FreeSurface(text_surface);
     SDL_DestroyTexture(text_texture);
+    SDL_FreeSurface(text_surface);
 }
 
 void score_txt(TTF_Font *font, int score, int x, int y)
@@ -845,6 +843,7 @@ void updateStars(Star *stars)
         SDL_RenderCopy(renderer, startexture, NULL, &starRect);
     }
 }
+
 void initRocks(Rock *rocks)
 {
     for (int i = 0; i < 3; i++)
@@ -855,6 +854,7 @@ void initRocks(Rock *rocks)
         rocks[i].size = rand() % 20 + 10;        // Random size between 10 and 30
     }
 }
+
 void updateRocks(Rock *rocks)
 {
     for (int i = 0; i < 3; i++)
