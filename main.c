@@ -135,14 +135,26 @@ int main(int argc, char *argv[])
 
     SDL_SetWindowIcon(window, iconSurface);
     SDL_FreeSurface(iconSurface);
+
+    char *word = getRandomWord("res/textfiles/EASY.txt");
+    int word_length = strlen(word);
+    char incorrect_guesses_letters[9];
+    char correct_guesses_letters[100];
+    memset(incorrect_guesses_letters, 0, sizeof(incorrect_guesses_letters));
+    memset(correct_guesses_letters, 0, sizeof(correct_guesses_letters));
+
+    bool *guessed_letters = malloc(word_length * sizeof(bool));
+    memset(guessed_letters, false, word_length * sizeof(bool));
+
+    int incorrect_guesses = 0;
+    int correct_guesses = 0;
+    score = 0;
+
     while (!quit)
     {
         SDL_Event event;
         // Initialize the game variables
-        bool difficultyChosen = false;
-        int incorrect_guesses = 0;
-        int correct_guesses = 0;
-        score = 0;
+
         // Handle other input events, such as key presses or mouse events
         while (SDL_PollEvent(&event))
         {
@@ -180,12 +192,15 @@ int main(int argc, char *argv[])
                         {
                         case MENU_START_GAME:
                             set = MENU_START_GAME;
+                            Mix_PlayChannel(-1, HIT, 0);
                             break;
                         case MENU_OPTIONS:
                             set = MENU_OPTIONS;
+                            Mix_PlayChannel(-1, HIT, 0);
                             break;
                         case MENU_QUIT:
                             quit = true;
+                            Mix_PlayChannel(-1, HIT, 0);
                             break;
                         }
                         break;
@@ -194,7 +209,7 @@ int main(int argc, char *argv[])
                     break;
                 }
             }
-            if (set == MENU_OPTIONS)
+            else if (set == MENU_OPTIONS)
             {
                 switch (event.type)
                 {
@@ -235,19 +250,166 @@ int main(int argc, char *argv[])
                     break;
                 }
             }
+            else if (set == MENU_START_GAME)
+            {
+                switch (event.type)
+                {
+                case SDL_QUIT:
+                    quit = true;
+                    break;
+                case SDL_KEYDOWN:
+                    switch (event.key.keysym.sym)
+                    {
+                    case SDLK_r:
+                        if (counter <= 0 || check_game_over(guessed_letters, word_length) || incorrect_guesses >= diffinco)
+                        {
+                            set = MAIN_MENU;
+                            Mix_PlayChannel(-1, Reset_sound, 0);
+                        }
+                        break;
+                    }
+                    if (event.key.keysym.sym >= 'a' && event.key.keysym.sym <= 'z')
+                    {
+                        char letter = event.key.keysym.sym;
+                        bool found_letter = false;
+
+                        // Check if the letter has already been guessed
+                        bool already_guessed = false;
+                        for (int i = 0; i < correct_guesses + incorrect_guesses; i++)
+                        {
+                            if (correct_guesses_letters[i] == letter)
+                            {
+                                already_guessed = true;
+                                break;
+                            }
+                        }
+
+                        // If the letter has not been guessed before, check if it is in the word
+                        if (!already_guessed)
+                        {
+                            // Check if the letter has already been guessed incorrectly
+                            bool already_incorrect = false;
+                            for (int i = 0; i < incorrect_guesses; i++)
+                            {
+                                if (incorrect_guesses_letters[i] == letter)
+                                {
+                                    already_incorrect = true;
+                                    break;
+                                }
+                            }
+
+                            // If the letter has not been guessed incorrectly before, check if it is in the word
+                            if (!already_incorrect && incorrect_guesses < diffinco)
+                            {
+                                for (int i = 0; i < word_length; i++)
+                                {
+                                    if (word[i] == letter)
+                                    {
+                                        guessed_letters[i] = true;
+                                        found_letter = true;
+                                    }
+                                }
+
+                                // If the letter was not found in the word, add it to the list of incorrect guesses
+                                if (!found_letter && !check_game_over(guessed_letters, word_length))
+                                {
+                                    incorrect_guesses_letters[incorrect_guesses] = letter;
+                                    incorrect_guesses++;
+                                    Mix_PlayChannel(-1, FALSEWAV, 0);
+
+                                    score -= livesrem / 2;
+                                    if (score <= 0)
+                                    {
+                                        score = 0;
+                                    }
+                                }
+                                else if (found_letter)
+                                {
+                                    correct_guesses_letters[correct_guesses] = letter;
+                                    correct_guesses++;
+                                    score += livesrem;
+                                    Mix_PlayChannel(-1, TRUEWAV, 0);
+                                }
+                            }
+                        }
+                    }
+
+                    break;
+                }
+            }
         }
         // Update game logic based on user input or other factors
+        if (set == MENU_OPTIONS)
+        {
+            switch (selected_options)
+            {
+            case EASY:
+                counter = 6 * 60;
+                livesrem = 100 / 9;
+                diffinco = 9;
+                break;
+            case MED:
+                counter = 4 * 60;
+                livesrem = 100 / 6;
+                diffinco = 6;
+                break;
+            case HARD:
+                counter = 3 * 60;
+                livesrem = 100 / 3;
+                diffinco = 3;
+                break;
+            }
+        }
+        else if (set == MENU_START_GAME)
+        {
+            if (counter >= 0 && check_game_over(guessed_letters, word_length))
+            {
+               
+            }
+        }
+
         // Render game objects based on the updated game logic
         if (set == MAIN_MENU)
         {
             draw_menu(font38, selected_item, selected_options);
-            SDL_RenderPresent(renderer);
         }
         if (set == MENU_OPTIONS)
         {
             draw_options(font38, selected_options);
-            SDL_RenderPresent(renderer);
         }
+        if (set == MENU_START_GAME)
+        {
+            if (counter > 0 && !check_game_over(guessed_letters, word_length) && incorrect_guesses < diffinco)
+            {
+                sprintf(timer_text, "%02d:%02d", counter / 60, counter % 60);
+                draw_txt(font28, timer_text, 0, 0);
+                updateStars(stars);
+                score_txt(font28, score, WINDOW_WIDTH - 200, 0);
+                draw_txt_g(font28, word, guessed_letters);
+                draw_admin(font28, true, word);
+                draw_tries(font28, selected_options, incorrect_guesses);
+                drawHangman(incorrect_guesses, selected_options);
+            }
+            else
+            {
+                if (counter <= 0)
+                {
+                    sprintf(timer_text, "Time's up!");
+                }
+                else if (check_game_over(guessed_letters, word_length))
+                {
+                    free(guessed_letters);
+                }
+                else if (incorrect_guesses >= diffinco)
+                {
+                    sprintf(timer_text, "Out of tries!");
+                }
+
+                draw_txt(font38, timer_text, 100, 100);
+                score_txt(font38, score, WINDOW_WIDTH / 2 - 110, WINDOW_HEIGHT / 2);
+            }
+        }
+        SDL_RenderPresent(renderer);
     }
 
     // Clean up and exit
@@ -348,7 +510,7 @@ void draw_options(TTF_Font *font38, int selected_options)
 {
     SDL_Color color = {255, 255, 255, 255};
     SDL_Rect text_rect;
-    
+
     // Clear the renderer
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
