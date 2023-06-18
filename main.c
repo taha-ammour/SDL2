@@ -139,6 +139,7 @@ int main(int argc, char *argv[])
     {
         SDL_Event event;
         // Initialize the game variables
+        bool difficultyChosen = false;
         int incorrect_guesses = 0;
         int correct_guesses = 0;
         score = 0;
@@ -227,8 +228,9 @@ int main(int argc, char *argv[])
 
                         break;
                     case SDLK_RETURN:
-
+                        set = MAIN_MENU;
                         Mix_PlayChannel(-1, HIT, 0);
+                        break;
                     }
                     break;
                 }
