@@ -142,6 +142,7 @@ int main(int argc, char *argv[])
         int incorrect_guesses = 0;
         int correct_guesses = 0;
         score = 0;
+        // Handle other input events, such as key presses or mouse events
         while (SDL_PollEvent(&event))
         {
             if (set == MAIN_MENU)
@@ -233,8 +234,8 @@ int main(int argc, char *argv[])
                 }
             }
         }
-        //update logic
-        //draw everything
+        // Update game logic based on user input or other factors
+        // Render game objects based on the updated game logic
         if (set == MAIN_MENU)
         {
             draw_menu(font38, selected_item, selected_options);
