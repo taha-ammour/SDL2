@@ -138,6 +138,19 @@ int main(int argc, char *argv[])
     int score = 0;
     bool initialized = true;
     char *word = getRandomWord("res/textfiles/EASY.txt");
+    free(word);
+    switch (selected_options)
+    {
+    case EASY:
+        word = getRandomWord("res/textfiles/EASY.txt");
+        break;
+    case MED:
+        word = getRandomWord("res/textfiles/MED.TXT");
+        break;
+    case HARD:
+        word = getRandomWord("res/textfiles/HARD.TXT");
+        break;
+    }
     int word_length = strlen(word);
     char incorrect_guesses_letters[9];
     char correct_guesses_letters[100];
@@ -162,7 +175,19 @@ int main(int argc, char *argv[])
             memset(correct_guesses_letters, 0, sizeof(correct_guesses_letters));
 
             free(word);
-            word = getRandomWord("res/textfiles/EASY.txt");
+            switch (selected_options)
+            {
+            case EASY:
+                word = getRandomWord("res/textfiles/EASY.txt");
+                break;
+            case MED:
+                word = getRandomWord("res/textfiles/MED.TXT");
+                break;
+            case HARD:
+                word = getRandomWord("res/textfiles/HARD.TXT");
+                break;
+            }
+
             word_length = strlen(word);
 
             guessed_letters = malloc(word_length * sizeof(bool));
@@ -414,14 +439,13 @@ int main(int argc, char *argv[])
         // Render game objects based on the updated game logic
         if (set == MAIN_MENU)
         {
-            draw_menu(font38, selected_item, selected_options); 
+            draw_menu(font38, selected_item, selected_options);
             updateStars(stars);
         }
         if (set == MENU_OPTIONS)
         {
-            draw_options(font38, selected_options);            
+            draw_options(font38, selected_options);
             updateStars(stars);
-
         }
         if (set == MENU_START_GAME)
         {
