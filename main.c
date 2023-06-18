@@ -233,6 +233,8 @@ int main(int argc, char *argv[])
                 }
             }
         }
+        //update logic
+        //draw everything
         if (set == MAIN_MENU)
         {
             draw_menu(font38, selected_item, selected_options);
