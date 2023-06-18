@@ -44,7 +44,6 @@ SDL_Renderer *renderer;
 
 bool fmenu = true;
 int set = MAIN_MENU;
-int score = 100;
 
 const int easylivetry = 9;
 const int medlivetry = 6;
@@ -136,6 +135,8 @@ int main(int argc, char *argv[])
     SDL_SetWindowIcon(window, iconSurface);
     SDL_FreeSurface(iconSurface);
 
+    int score = 0;
+    bool initialized = true;
     char *word = getRandomWord("res/textfiles/EASY.txt");
     int word_length = strlen(word);
     char incorrect_guesses_letters[9];
@@ -148,13 +149,28 @@ int main(int argc, char *argv[])
 
     int incorrect_guesses = 0;
     int correct_guesses = 0;
-    score = 0;
-
     while (!quit)
     {
         SDL_Event event;
         // Initialize the game variables
 
+        if (!initialized)
+        {
+            free(guessed_letters);
+            guessed_letters = NULL;
+            memset(incorrect_guesses_letters, 0, sizeof(incorrect_guesses_letters));
+            memset(correct_guesses_letters, 0, sizeof(correct_guesses_letters));
+
+            free(word);
+            word = getRandomWord("res/textfiles/EASY.txt");
+            word_length = strlen(word);
+
+            guessed_letters = malloc(word_length * sizeof(bool));
+            memset(guessed_letters, false, word_length * sizeof(bool));
+            correct_guesses = 0;
+
+            initialized = true;
+        }
         // Handle other input events, such as key presses or mouse events
         while (SDL_PollEvent(&event))
         {
@@ -261,9 +277,30 @@ int main(int argc, char *argv[])
                     switch (event.key.keysym.sym)
                     {
                     case SDLK_r:
-                        if (counter <= 0 || check_game_over(guessed_letters, word_length) || incorrect_guesses >= diffinco)
+                        if (counter <= 0 || incorrect_guesses >= diffinco)
                         {
                             set = MAIN_MENU;
+                            initialized = false;
+                            incorrect_guesses = 0;
+                            score = 0;
+                            switch (selected_options)
+                            {
+                            case EASY:
+                                counter = 6 * 60;
+                                livesrem = 100 / 9;
+                                diffinco = 9;
+                                break;
+                            case MED:
+                                counter = 4 * 60;
+                                livesrem = 100 / 6;
+                                diffinco = 6;
+                                break;
+                            case HARD:
+                                counter = 3 * 60;
+                                livesrem = 100 / 3;
+                                diffinco = 3;
+                                break;
+                            }
                             Mix_PlayChannel(-1, Reset_sound, 0);
                         }
                         break;
@@ -313,22 +350,28 @@ int main(int argc, char *argv[])
                                 // If the letter was not found in the word, add it to the list of incorrect guesses
                                 if (!found_letter && !check_game_over(guessed_letters, word_length))
                                 {
-                                    incorrect_guesses_letters[incorrect_guesses] = letter;
-                                    incorrect_guesses++;
-                                    Mix_PlayChannel(-1, FALSEWAV, 0);
 
-                                    score -= livesrem / 2;
-                                    if (score <= 0)
+                                    if (initialized)
                                     {
-                                        score = 0;
+                                        incorrect_guesses_letters[incorrect_guesses] = letter;
+                                        incorrect_guesses++;
+                                        Mix_PlayChannel(-1, FALSEWAV, 0);
+                                        score -= livesrem / 2;
+                                        if (score <= 0)
+                                        {
+                                            score = 0;
+                                        }
                                     }
                                 }
                                 else if (found_letter)
                                 {
-                                    correct_guesses_letters[correct_guesses] = letter;
-                                    correct_guesses++;
-                                    score += livesrem;
-                                    Mix_PlayChannel(-1, TRUEWAV, 0);
+                                    if (initialized)
+                                    {
+                                        correct_guesses_letters[correct_guesses] = letter;
+                                        correct_guesses++;
+                                        score += livesrem;
+                                        Mix_PlayChannel(-1, TRUEWAV, 0);
+                                    }
                                 }
                             }
                         }
@@ -364,22 +407,25 @@ int main(int argc, char *argv[])
         {
             if (counter >= 0 && check_game_over(guessed_letters, word_length))
             {
-               
+                initialized = false;
             }
         }
 
         // Render game objects based on the updated game logic
         if (set == MAIN_MENU)
         {
-            draw_menu(font38, selected_item, selected_options);
+            draw_menu(font38, selected_item, selected_options); 
+            updateStars(stars);
         }
         if (set == MENU_OPTIONS)
         {
-            draw_options(font38, selected_options);
+            draw_options(font38, selected_options);            
+            updateStars(stars);
+
         }
         if (set == MENU_START_GAME)
         {
-            if (counter > 0 && !check_game_over(guessed_letters, word_length) && incorrect_guesses < diffinco)
+            if (counter > 0 && incorrect_guesses < diffinco)
             {
                 sprintf(timer_text, "%02d:%02d", counter / 60, counter % 60);
                 draw_txt(font28, timer_text, 0, 0);
@@ -395,10 +441,6 @@ int main(int argc, char *argv[])
                 if (counter <= 0)
                 {
                     sprintf(timer_text, "Time's up!");
-                }
-                else if (check_game_over(guessed_letters, word_length))
-                {
-                    free(guessed_letters);
                 }
                 else if (incorrect_guesses >= diffinco)
                 {
