@@ -29,6 +29,7 @@
         "sdl.h": "c",
         "sdl_image.h": "c",
         "auth.h": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "sdl_ttf.h": "c"
     }
 }

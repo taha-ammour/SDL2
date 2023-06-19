@@ -9,6 +9,7 @@
 #include <math.h>
 #include <time.h>
 #include <unistd.h>
+#include "file/Auth.h"
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 500
@@ -43,7 +44,7 @@ SDL_Renderer *renderer;
 #define MAX_WORD_LENGTH 100
 
 bool fmenu = true;
-int set = MAIN_MENU;
+int set = MENU_AUTH;
 
 const int easylivetry = 9;
 const int medlivetry = 6;
@@ -162,6 +163,10 @@ int main(int argc, char *argv[])
 
     int incorrect_guesses = 0;
     int correct_guesses = 0;
+    bool select_user = false;
+    bool select_pass = false;
+    char username[100] = {0};
+    char password[100] = {0};
     while (!quit)
     {
         SDL_Event event;
@@ -405,6 +410,98 @@ int main(int argc, char *argv[])
                     break;
                 }
             }
+            else if (set == MENU_AUTH)
+            {
+                switch (event.type)
+                {
+                case SDL_QUIT:
+                    quit = true;
+                    break;
+                case SDL_MOUSEBUTTONDOWN:
+                    int MouseX = event.button.x;
+                    int MouseY = event.button.y;
+                    Uint32 mouseState = SDL_GetMouseState(&MouseX, &MouseY);
+                    if (MouseX >= 95 && MouseX <= 305 && MouseY >= 205 && MouseY <= 245)
+                    {
+
+                        // Authenticate the credentials
+                        bool isAuthenticated = authenticateUser(username, password);
+                        if (isAuthenticated)
+                        {
+                            printf("Login successful!\n");
+                            set = MAIN_MENU;
+                        }
+                        else
+                        {
+                            printf("Invalid credentials.\n");
+                        }
+                    }
+                    if (MouseX >= 290 && MouseX <= 490 && MouseY >= 110 && MouseY <= 142)
+                    {
+                        select_user = true;
+                        select_pass = false;
+                    }
+                    if (MouseX >= 290 && MouseX <= 490 && MouseY >= 160 && MouseY <= 192)
+                    {
+                        select_pass = true;
+                        select_user = false;
+                    }if(MouseX >= 345 && MouseX <= 555 && MouseY >= 205 && MouseY <= 245){
+                        if (registerUser(username, password)){
+                            printf("Registration Successful!");
+                            set = MAIN_MENU;
+                        }
+                    }
+
+                    // Print mouse coordinates
+                    printf("Mouse X: %d, Mouse Y: %d\n", MouseX, MouseY);
+                    break;
+                case SDL_TEXTINPUT:
+                    if (select_user)
+                    {
+                        if (strlen(username) < sizeof(username) - 1)
+                        {
+                            strncat(username, event.text.text, sizeof(username) - strlen(username) - 1);
+                            
+                        } 
+                    }
+                    if (select_pass)
+                    {
+                        if (strlen(password) < sizeof(password) - 1)
+                        {
+                            strncat(password, event.text.text, sizeof(password) - strlen(username) - 1);
+                            
+                        }
+                    }
+
+                    break;
+
+                case SDL_KEYDOWN:
+                    if (select_user)
+                    {
+                        if (event.key.keysym.sym == SDLK_BACKSPACE)
+                        {
+                            if (strlen(username) > 0)
+                            {
+                                username[strlen(username) - 1] = '\0';
+                            }
+                        }
+                    }
+                    if (select_pass)
+                    {
+                        if (event.key.keysym.sym == SDLK_BACKSPACE)
+                        {
+                            if (strlen(password) > 0)
+                            {
+                                password[strlen(password) - 1] = '\0';
+                            }
+                        }
+                    }
+                    
+
+                    break;
+                
+                }
+            }
         }
         // Update game logic based on user input or other factors
         if (set == MENU_OPTIONS)
@@ -474,6 +571,11 @@ int main(int argc, char *argv[])
                 draw_txt(font38, timer_text, 100, 100);
                 score_txt(font38, score, WINDOW_WIDTH / 2 - 110, WINDOW_HEIGHT / 2);
             }
+        }
+        if (set == MENU_AUTH)
+        {
+            createAuthwin(renderer, font28, username, password);
+            updateRocks(rocks);
         }
         SDL_RenderPresent(renderer);
     }
@@ -1088,26 +1190,16 @@ void initRocks(Rock *rocks)
     }
 }
 
-void updateRocks(Rock *rocks)
-{
-    for (int i = 0; i < 3; i++)
-    {
-        if (rocks[i].y < 0 || rocks[i].y >= WINDOW_HEIGHT)
-        {
-            // If rock reaches the left or right edge, reset its position
-            rocks[i].x = (i % 2 == 0) ? 0 : 770;
-            rocks[i].y = 0;
-            rocks[i].speed = rand() % 5 + 1;
-            rocks[i].size = rand() % 20 + 10;
+void updateRocks(Rock* rocks) {
+    for (int i = 0; i < 3; i++) {
+        if (rocks[i].y < 0 || rocks[i].y >= WINDOW_HEIGHT - (3 * rocks[i].size)) {
+            rocks[i].speed = -rocks[i].speed; // Reverse the direction of the rock
         }
-        else
-        {
-            rocks[i].y += rocks[i].speed;
-        }
-    }
-    for (int i = 0; i < 3; i++)
-    {
-        SDL_Rect rockRect = {rocks[i].x, rocks[i].y, 3 * rocks[i].size, 3 * rocks[i].size};
+
+        rocks[i].y += rocks[i].speed * (rand()% 2 + 1);
+
+        SDL_Rect rockRect = { rocks[i].x, rocks[i].y, 3 * rocks[i].size, 3 * rocks[i].size };
         SDL_RenderCopy(renderer, rockTexture, NULL, &rockRect);
     }
 }
+
