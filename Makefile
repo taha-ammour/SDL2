@@ -8,8 +8,8 @@ LIBS = -lmingw32 -lSDL2main -lSDL2 -lSDL2_TTF -lSDL2_image -lSDL2_mixer
 all: main
 
 # Build target for app
-main: main.c map.c
-	gcc $(CFLAGS) -o main main.c map.c  $(LIBS)
+main: main.c auth.c
+	gcc $(CFLAGS) -o main main.c auth.c  $(LIBS)
 
 # Build target for debugging
 debug: CFLAGS += -g
