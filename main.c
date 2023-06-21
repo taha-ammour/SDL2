@@ -468,7 +468,7 @@ int main(int argc, char *argv[])
                     {
                         if (strlen(password) < sizeof(password) - 1)
                         {
-                            strncat(password, event.text.text, sizeof(password) - strlen(username) - 1);
+                            strncat(password, event.text.text, sizeof(password) - strlen(password) - 1);
                             
                         }
                     }
