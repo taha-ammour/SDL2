@@ -9,6 +9,7 @@
 #include <math.h>
 #include <time.h>
 #include <unistd.h>
+#include <gmp.h>
 #include "file/Auth.h"
 
 #define WINDOW_WIDTH 800
