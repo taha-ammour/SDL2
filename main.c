@@ -39,20 +39,24 @@ Mix_Chunk *Reset_sound;
 SDL_Window *window;
 SDL_Renderer *renderer;
 
+Data userData;
+
 #define MAIN_MENU 4
 #define MENU_START_GAME 0
 #define MENU_OPTIONS 1
-#define MENU_QUIT 2
+#define MENU_SHOP 2
+#define MENU_QUIT 3
 #define MAX_WORD_LENGTH 100
 
 bool fmenu = true;
 int set = MENU_AUTH;
 
+char username[100] = {0};
+char password[100] = {0};
+
 const int easylivetry = 9;
 const int medlivetry = 6;
 const int hardlivetry = 3;
-
-Data userData;
 
 int livesrem;
 
@@ -170,9 +174,6 @@ int main(int argc, char *argv[])
     bool select_user = false;
     bool select_pass = false;
 
-    char username[100] = {0};
-    char password[100] = {0};
-
     while (!quit)
     {
         SDL_Event event;
@@ -217,47 +218,67 @@ int main(int argc, char *argv[])
                 case SDL_QUIT:
                     quit = true;
                     break;
-                case SDL_KEYDOWN:
+                case SDL_MOUSEMOTION:
+                    int MouseX = event.button.x;
+                    int MouseY = event.button.y;
+                    Uint32 mouseState = SDL_GetMouseState(&MouseX, &MouseY);
 
-                    switch (event.key.keysym.sym)
+                    if (MouseX >= 240 && MouseX <= 526 && MouseY >= 160 && MouseY <= 200)
                     {
-                    case SDLK_UP:
-                        selected_item--;
-                        if (selected_item < MENU_START_GAME)
+                        selected_item = MENU_START_GAME;
+                        if (Mix_Playing(-1) == 0)
                         {
-                            selected_item = MENU_QUIT;
+                            Mix_PlayChannel(-1, HIT, 0);
                         }
-                        Mix_PlayChannel(-1, Clicksound, 0);
-                        break;
-                    case SDLK_DOWN:
-                        // scrolling down in main menu
-                        selected_item++;
-                        if (selected_item > MENU_QUIT)
+                    }
+                    else if (MouseX >= 285 && MouseX <= 478 && MouseY >= 205 && MouseY <= 247)
+                    {
+                        selected_item = MENU_OPTIONS;
+                        if (Mix_Playing(-1) == 0)
                         {
-                            selected_item = MENU_START_GAME;
+                            Mix_PlayChannel(-1, HIT, 0);
                         }
-                        Mix_PlayChannel(-1, Clicksound, 0);
-
-                        break;
-                    case SDLK_RETURN:
-                        switch (selected_item)
+                    }
+                    else if (MouseX >= 314 && MouseX <= 435 && MouseY >= 258 && MouseY <= 301)
+                    {
+                        selected_item = MENU_SHOP;
+                        if (Mix_Playing(-1) == 0)
                         {
-                        case MENU_START_GAME:
-                            set = MENU_START_GAME;
                             Mix_PlayChannel(-1, HIT, 0);
-                            break;
-                        case MENU_OPTIONS:
-                            set = MENU_OPTIONS;
-                            Mix_PlayChannel(-1, HIT, 0);
-                            break;
-                        case MENU_QUIT:
-                            quit = true;
-                            Mix_PlayChannel(-1, HIT, 0);
-                            break;
                         }
-                        break;
+                    }
+                    else if (MouseX >= 315 && MouseX <= 430 && MouseY >= 314 && MouseY <= 345)
+                    {
+                        selected_item = MENU_QUIT;
+                        if (Mix_Playing(-1) == 0)
+                        {
+                            Mix_PlayChannel(-1, HIT, 0);
+                        }
                     }
 
+                    break;
+                case SDL_MOUSEBUTTONDOWN:
+
+                    if (MouseX >= 240 && MouseX <= 526 && MouseY >= 160 && MouseY <= 200)
+                    {
+                        set = MENU_START_GAME;
+                        Mix_PlayChannel(-1, HIT, 0);
+                    }
+                    else if (MouseX >= 285 && MouseX <= 478 && MouseY >= 205 && MouseY <= 247)
+                    {
+                        set = MENU_OPTIONS;
+                        Mix_PlayChannel(-1, Clicksound, 0);
+                    }
+                    else if (MouseX >= 314 && MouseX <= 435 && MouseY >= 258 && MouseY <= 301)
+                    {
+                        set = MENU_SHOP;
+                        Mix_PlayChannel(-1, Clicksound, 0);
+                    }
+                    else if (MouseX >= 315 && MouseX <= 430 && MouseY >= 314 && MouseY <= 345)
+                    {
+                        set = MENU_QUIT;
+                        Mix_PlayChannel(-1, Clicksound, 0);
+                    }
                     break;
                 }
             }
@@ -315,6 +336,8 @@ int main(int argc, char *argv[])
                     case SDLK_r:
                         if (counter <= 0 || incorrect_guesses >= diffinco)
                         {
+                            mpz_add_ui(userData.score, userData.score, score);
+                            updateUserData(username, &userData);
                             set = MAIN_MENU;
                             initialized = false;
                             incorrect_guesses = 0;
@@ -431,7 +454,7 @@ int main(int argc, char *argv[])
                     {
 
                         // Authenticate the credentials
-                        bool isAuthenticated = authenticateUser(username, password , &userData);
+                        bool isAuthenticated = authenticateUser(username, password, &userData);
                         if (isAuthenticated)
                         {
                             printf("Login successful!\n");
@@ -451,15 +474,16 @@ int main(int argc, char *argv[])
                     {
                         select_pass = true;
                         select_user = false;
-                    }if(MouseX >= 345 && MouseX <= 555 && MouseY >= 205 && MouseY <= 245){
-                        if (registerUser(username, password)){
+                    }
+                    if (MouseX >= 345 && MouseX <= 555 && MouseY >= 205 && MouseY <= 245)
+                    {
+                        if (registerUser(username, password, &userData))
+                        {
                             printf("Registration Successful!");
                             set = MAIN_MENU;
                         }
                     }
 
-                    // Print mouse coordinates
-                    printf("Mouse X: %d, Mouse Y: %d\n", MouseX, MouseY);
                     break;
                 case SDL_TEXTINPUT:
                     if (select_user)
@@ -467,15 +491,13 @@ int main(int argc, char *argv[])
                         if (strlen(username) < sizeof(username) - 1)
                         {
                             strncat(username, event.text.text, sizeof(username) - strlen(username) - 1);
-                            
-                        } 
+                        }
                     }
                     if (select_pass)
                     {
                         if (strlen(password) < sizeof(password) - 1)
                         {
                             strncat(password, event.text.text, sizeof(password) - strlen(password) - 1);
-                            
                         }
                     }
 
@@ -502,12 +524,34 @@ int main(int argc, char *argv[])
                             }
                         }
                     }
-                    
 
                     break;
-                
                 }
             }
+            else if (set == MENU_SHOP)
+            {
+                switch (event.type)
+                {
+                case SDL_QUIT:
+                    quit = true;
+                    break;
+                case SDL_KEYDOWN:
+                    switch (event.key.keysym.sym)
+                    {
+                    case SDLK_r:
+                        set = MAIN_MENU;
+                        break;
+                    }
+                    break;
+                case SDL_MOUSEBUTTONDOWN:
+                    break;
+                }
+            }
+            else if (set == MENU_QUIT)
+            {
+                quit = true;
+            }
+            
         }
         // Update game logic based on user input or other factors
         if (set == MENU_OPTIONS)
@@ -559,7 +603,8 @@ int main(int argc, char *argv[])
                 updateStars(stars);
                 score_txt(font28, score, WINDOW_WIDTH - 200, 0);
                 draw_txt_g(font28, word, guessed_letters);
-                if(!strcmp(username, "admin")){
+                if (!strcmp(username, "admin"))
+                {
                     draw_admin(font28, true, word);
                 }
                 draw_tries(font28, selected_options, incorrect_guesses);
@@ -585,9 +630,13 @@ int main(int argc, char *argv[])
             createAuthwin(renderer, font28, username, password);
             updateRocks(rocks);
         }
+        if (set == MENU_SHOP)
+        {
+            drawshop(renderer, font28, &userData);
+        }
+
         SDL_RenderPresent(renderer);
     }
-
     // Clean up and exit
     SDL_DestroyTexture(startexture);
     SDL_RemoveTimer(timer_id);
@@ -656,10 +705,20 @@ void draw_menu(TTF_Font *font38, int selected_item, int selected_options)
     SDL_FreeSurface(text_surface);
     SDL_DestroyTexture(text_texture);
 
-    text_surface = TTF_RenderText_Blended(font38, "Quit", (selected_item == MENU_QUIT) ? color : (SDL_Color){128, 128, 128, 255});
+    text_surface = TTF_RenderText_Blended(font38, "Shop", (selected_item == MENU_SHOP) ? color : (SDL_Color){128, 128, 128, 255});
     text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
     text_rect.x = 320;
     text_rect.y = 250;
+    text_rect.w = text_surface->w;
+    text_rect.h = text_surface->h;
+    SDL_RenderCopy(renderer, text_texture, NULL, &text_rect);
+    SDL_FreeSurface(text_surface);
+    SDL_DestroyTexture(text_texture);
+
+    text_surface = TTF_RenderText_Blended(font38, "Quit", (selected_item == MENU_QUIT) ? color : (SDL_Color){128, 128, 128, 255});
+    text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
+    text_rect.x = 320;
+    text_rect.y = 300;
     text_rect.w = text_surface->w;
     text_rect.h = text_surface->h;
     SDL_RenderCopy(renderer, text_texture, NULL, &text_rect);
@@ -752,15 +811,14 @@ void score_txt(TTF_Font *font, int score, int x, int y)
     int text_height = surface->h;
 
     SDL_Rect dst_rect;
-    dst_rect.x = x;
+    dst_rect.x = WINDOW_WIDTH - 20 - surface->w;
     dst_rect.y = y;
     dst_rect.w = text_width;
     dst_rect.h = text_height;
 
     SDL_RenderCopy(renderer, texture, NULL, &dst_rect);
-
-    SDL_DestroyTexture(texture);
     SDL_FreeSurface(surface);
+    SDL_DestroyTexture(texture);
 }
 
 void drawHangman(int wrongGuesses, int selected_options)
@@ -1023,6 +1081,7 @@ bool check_game_over(bool *guessed_letters, int word_length)
             return false;
         }
     }
+    userData.level++;
     return true;
 }
 
@@ -1198,16 +1257,18 @@ void initRocks(Rock *rocks)
     }
 }
 
-void updateRocks(Rock* rocks) {
-    for (int i = 0; i < 3; i++) {
-        if (rocks[i].y < 0 || rocks[i].y >= WINDOW_HEIGHT - (3 * rocks[i].size)) {
+void updateRocks(Rock *rocks)
+{
+    for (int i = 0; i < 3; i++)
+    {
+        if (rocks[i].y < 0 || rocks[i].y >= WINDOW_HEIGHT - (3 * rocks[i].size))
+        {
             rocks[i].speed = -rocks[i].speed; // Reverse the direction of the rock
         }
 
-        rocks[i].y += rocks[i].speed * (rand()% 2 + 1);
+        rocks[i].y += rocks[i].speed * (rand() % 2 + 1);
 
-        SDL_Rect rockRect = { rocks[i].x, rocks[i].y, 3 * rocks[i].size, 3 * rocks[i].size };
+        SDL_Rect rockRect = {rocks[i].x, rocks[i].y, 3 * rocks[i].size, 3 * rocks[i].size};
         SDL_RenderCopy(renderer, rockTexture, NULL, &rockRect);
     }
 }
-

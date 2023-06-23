@@ -1,7 +1,10 @@
 #include <stdlib.h>
+#include <stdio.h>
+#include <gmp.h>
 #include "file/Auth.h"
+#include "file/shop.h"
 
-bool authenticateUser(const char *username, const char *password)
+bool authenticateUser(const char *username, const char *password, Data *storedData)
 {
     FILE *file = fopen("user.txt", "r");
     if (file == NULL)
@@ -10,26 +13,38 @@ bool authenticateUser(const char *username, const char *password)
         return false;
     }
 
-    char buffer[MAX_USERNAME_LENGTH + MAX_PASSWORD_LENGTH + 2]; // +2 for delimiter and null terminator
+    char buffer[MAX_USERNAME_LENGTH + MAX_PASSWORD_LENGTH + sizeof(Data) + 3];
 
     while (fgets(buffer, sizeof(buffer), file) != NULL)
     {
         char storedUsername[MAX_USERNAME_LENGTH];
         char storedPassword[MAX_PASSWORD_LENGTH];
-        sscanf(buffer, "%[^;];%s", storedUsername, storedPassword);
+        char storedMultiplier[10];
+        int storedLevel;
+        int storedIsNewbie;
+        char* storedScore = NULL;
+
+        sscanf(buffer, "%[^;];%[^;];%[^;];%d;%d;%ms", storedUsername, storedPassword, storedMultiplier, &storedLevel, &storedIsNewbie, &storedScore);
 
         if (strcmp(username, storedUsername) == 0 && strcmp(password, storedPassword) == 0)
         {
+            storedData->multiplier = atof(storedMultiplier);
+            storedData->level = storedLevel;
+            storedData->isNewbie = storedIsNewbie;
+            mpz_init_set_str(storedData->score, storedScore, 10);
+            free(storedScore);
+
             fclose(file);
             return true;
         }
+        free(storedScore);
     }
 
     fclose(file);
     return false;
 }
 
-bool registerUser(const char *username, const char *password)
+bool registerUser(const char *username, const char *password, Data *userData)
 {
     // Check if username or password is empty or contains spaces
     if (username == NULL || password == NULL || username[0] == '\0' || password[0] == '\0')
@@ -90,7 +105,11 @@ bool registerUser(const char *username, const char *password)
         return false;
     }
 
-    fprintf(file, "%s;%s\n", username, password);
+    char *scoreStr;
+    gmp_asprintf(&scoreStr, "%Zd", userData->score);
+
+    fprintf(file, "%s;%s;%.2f;%d;%d;%s\n", username, password, userData->multiplier, userData->level, userData->isNewbie, scoreStr);
+
     fclose(file);
 
     printf("User registered successfully!\n");

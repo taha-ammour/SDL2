@@ -16,8 +16,7 @@ typedef struct {
     int level;
     bool isNewbie;
 } Data;
-
-
-void storeUserData(const Data* userData);
-
+bool updateUserData(const char *username, const Data *userData);
+const char* getSuffix(int exponent);
+void drawshop(SDL_Renderer* renderer,TTF_Font* font ,Data* userdata);
 #endif 
