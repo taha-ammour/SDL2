@@ -12,7 +12,7 @@
 
 typedef struct {
     mpz_t score;
-    float multiplier;
+    size_t multiplier;
     int level;
     bool isNewbie;
 } Data;

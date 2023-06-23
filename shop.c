@@ -1,13 +1,14 @@
 #include "file/Auth.h"
 #include "file/shop.h"
+#include <math.h>
 
-
-char* formatNumberWithSuffix(mpz_t number) {
+char *formatNumberWithSuffix(mpz_t number)
+{
     mpz_t base;
     mpz_init(base);
     mpz_set_ui(base, 1000);
 
-    char* suffixes[] = {"", "k", "M", "B", "T"};
+    char *suffixes[] = {"", "k", "M", "B", "T"};
     int suffixIndex = 0;
 
     mpz_t quotient, remainder;
@@ -15,7 +16,8 @@ char* formatNumberWithSuffix(mpz_t number) {
     mpz_init(remainder);
 
     mpz_tdiv_qr(quotient, remainder, number, base);
-    while (mpz_cmp_ui(quotient, 0) >= 1 && suffixIndex < sizeof(suffixes) / sizeof(suffixes[0]) - 1) {
+    while (mpz_cmp_ui(quotient, 0) >= 1 && suffixIndex < sizeof(suffixes) / sizeof(suffixes[0]) - 1)
+    {
         mpz_tdiv_qr(quotient, remainder, quotient, base);
         suffixIndex++;
     }
@@ -25,14 +27,16 @@ char* formatNumberWithSuffix(mpz_t number) {
     size_t length = strlen(numberString);
 
     size_t bufferSize = BUFFER_SIZE;
-    char* formattedNumber = (char*)malloc(bufferSize * sizeof(char));
-    if (formattedNumber == NULL) {
+    char *formattedNumber = (char *)malloc(bufferSize * sizeof(char));
+    if (formattedNumber == NULL)
+    {
         // Handle memory allocation failure
         mpz_clears(base, quotient, remainder, NULL);
         return NULL;
     }
 
-    if (suffixIndex > 0) {
+    if (suffixIndex > 0)
+    {
         int decimalIndex = length % 3;
         if (decimalIndex == 0)
             decimalIndex = 3;
@@ -41,7 +45,8 @@ char* formatNumberWithSuffix(mpz_t number) {
         numberString[decimalIndex] = '.';
 
         size_t suffixLength = strlen(suffixes[suffixIndex]);
-        if (length + suffixLength + 4 < BUFFER_SIZE) {  // Increase buffer size to accommodate the decimal places and suffix
+        if (length + suffixLength + 4 < BUFFER_SIZE)
+        { // Increase buffer size to accommodate the decimal places and suffix
             snprintf(numberString + length + 1, 4, "%.2s", suffixes[suffixIndex]);
         }
     }
@@ -52,7 +57,6 @@ char* formatNumberWithSuffix(mpz_t number) {
     mpz_clears(base, quotient, remainder, NULL);
     return formattedNumber;
 }
-
 
 bool updateUserData(const char *username, const Data *userData)
 {
@@ -109,7 +113,7 @@ bool updateUserData(const char *username, const Data *userData)
         {
             char scoreStr[MAX_USERNAME_LENGTH];
             gmp_sprintf(scoreStr, "%Zd", userData->score);
-            fprintf(tempFile, "%s;%s;%.2f;%d;%d;%s\n", username, storedPassword, userData->multiplier, userData->level, userData->isNewbie, scoreStr);
+            fprintf(tempFile, "%s;%s;%ld;%d;%d;%s\n", username, storedPassword, userData->multiplier, userData->level, userData->isNewbie, scoreStr);
         }
         else
         {
@@ -149,7 +153,7 @@ void drawshop(SDL_Renderer *renderer, TTF_Font *font, Data *userdata, bool isUnl
     char *scoreStr;
     gmp_asprintf(&scoreStr, "score: %Zd", userdata->score);
 
-    char* result = formatNumberWithSuffix(userdata->score);
+    char *result = formatNumberWithSuffix(userdata->score);
 
     text_surface = TTF_RenderText_Blended(font, result, color);
     text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
@@ -184,6 +188,20 @@ void drawshop(SDL_Renderer *renderer, TTF_Font *font, Data *userdata, bool isUnl
     SDL_RenderCopy(renderer, text_texture, NULL, &text_rect);
     SDL_FreeSurface(text_surface);
     SDL_DestroyTexture(text_texture);
+
+    char Multlvl[100];
+    sprintf(Multlvl, "Mult: x%d.00", userdata->multiplier);
+    text_surface = TTF_RenderText_Blended(font18, Multlvl, color);
+    text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
+    text_rect.x = (800 - text_surface->w) / 2;
+    text_rect.y = 40;
+    text_rect.w = text_surface->w;
+    text_rect.h = text_surface->h;
+
+    SDL_RenderCopy(renderer, text_texture, NULL, &text_rect);
+    SDL_FreeSurface(text_surface);
+    SDL_DestroyTexture(text_texture);
+
     int y = 72;
     for (int i = 0; i < 5; i++)
     {
@@ -194,35 +212,9 @@ void drawshop(SDL_Renderer *renderer, TTF_Font *font, Data *userdata, bool isUnl
             SDL_RenderFillRect(renderer, &itemRect);
             char textshow[100];
 
-            switch (i)
-            {
-            case 0:
-                int co = 1;
-                float mult = .2;
-                sprintf(textshow, "up %d unlocked buy %02.2f multiplier for 50", co, mult);
-                break;
-            case 1:
-                mult = .8;
-                co++;
-                sprintf(textshow, "up %d unlocked buy %02.2f multiplier for 250", co, mult);
-                break;
-            case 2:
-                mult = 1.6;
-                co++;
-                sprintf(textshow, "up %d unlocked buy %02.2f multiplier for 1000", co, mult);
-                break;
-            case 3:
-                mult = 3.2;
-                co++;
-                sprintf(textshow, "up %d unlocked buy %02.2f multiplier for 10.000", co, mult);
-                break;
-            case 4:
-                mult = 10.4;
-                co++;
-                sprintf(textshow, "up %d unlocked buy %02.2f multiplier for 100.000", co, mult);
-
-                break;
-            }
+            int co = i + 1;
+            size_t mult = 2 * pow(2, i);
+            sprintf(textshow, "up %d unlocked buy %02d multiplier for %lld", co, mult, 50 * (size_t)pow(userdata->multiplier, i+1));
             text_surface = TTF_RenderText_Blended(font18, textshow, color);
             text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
             text_rect.x = (800 - text_surface->w) / 4 + 70;
@@ -243,20 +235,20 @@ void drawshop(SDL_Renderer *renderer, TTF_Font *font, Data *userdata, bool isUnl
             switch (i)
             {
             case 0:
-                text_surface = TTF_RenderText_Blended(font, "Not Unlocked Req lvl 10", color);
+                text_surface = TTF_RenderText_Blended(font, "Not Unlocked Req lvl     50", color);
                 break;
 
             case 1:
-                text_surface = TTF_RenderText_Blended(font, "Not Unlocked Req lvl 30", color);
+                text_surface = TTF_RenderText_Blended(font, "Not Unlocked Req lvl    100", color);
                 break;
             case 2:
-                text_surface = TTF_RenderText_Blended(font, "Not Unlocked Req lvl 50", color);
+                text_surface = TTF_RenderText_Blended(font, "Not Unlocked Req lvl    500", color);
                 break;
             case 3:
-                text_surface = TTF_RenderText_Blended(font, "Not Unlocked Req lvl 70", color);
+                text_surface = TTF_RenderText_Blended(font, "Not Unlocked Req lvl  1.000", color);
                 break;
             case 4:
-                text_surface = TTF_RenderText_Blended(font, "Not Unlocked Req lvl 100", color);
+                text_surface = TTF_RenderText_Blended(font, "Not Unlocked Req lvl 10.000", color);
                 break;
             }
 
@@ -307,4 +299,3 @@ void drawshop(SDL_Renderer *renderer, TTF_Font *font, Data *userdata, bool isUnl
         }
     }
 }
-

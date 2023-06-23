@@ -175,13 +175,12 @@ int main(int argc, char *argv[])
     int correct_guesses = 0;
     bool select_user = false;
     bool select_pass = false;
-    bool isUnlocked[5] ={false};
+    bool isUnlocked[5] = {false};
 
     for (int i = 0; i < 5; i++)
     {
         isUnlocked[i] = false;
     }
-    
 
     while (!quit)
     {
@@ -556,35 +555,48 @@ int main(int argc, char *argv[])
                     int MouseX = event.button.x;
                     int MouseY = event.button.y;
                     Uint32 mouseState = SDL_GetMouseState(&MouseX, &MouseY);
-                    printf("Mouse x :%d, Mouse y: %d\n",MouseX,MouseY);
-                    if (MouseX >= 720 && MouseX <= 790 && MouseY >= 79 && MouseY <= 143)
+                    printf("Mouse x :%d, Mouse y: %d\n", MouseX, MouseY);
+                    if (MouseX >= 720 && MouseX <= 790 && MouseY >= 79 && MouseY <= 143 && isUnlocked[0])
                     {
-                        if (isUnlocked[0]){
-                            
-                        }
-                    }else if (MouseX >= 720 && MouseX <= 790 && MouseY >= 164 && MouseY <= 228)
-                    {
-                        if (isUnlocked[1]){
-                            
+                        if (mpz_cmp_ui(userData.score, 50 * pow(userData.multiplier, 1)) >= 0)
+                        {
+                            mpz_sub_ui(userData.score, userData.score, 50 * pow(userData.multiplier, 1));
+                            userData.multiplier += 2;
                         }
                     }
-                    else if (MouseX >= 720 && MouseX <= 790 && MouseY >= 250 && MouseY <= 316)
+                    else if (MouseX >= 720 && MouseX <= 790 && MouseY >= 164 && MouseY <= 228 && isUnlocked[1])
                     {
-                        if (isUnlocked[2]){
-                            
-                        }
-                    }else if (MouseX >= 720 && MouseX <= 790 && MouseY >= 338 && MouseY <= 400)
-                    {
-                        if (isUnlocked[3]){
-                            
-                        }
-                    }else if (MouseX >= 720 && MouseX <= 790 && MouseY >= 423 && MouseY <= 486)
-                    {
-                        if (isUnlocked[4]){
-                            
+                        if (mpz_cmp_ui(userData.score, 50 * pow(userData.multiplier, 2)) >= 0)
+                        {
+                            mpz_sub_ui(userData.score, userData.score, 50 * pow(userData.multiplier, 2));
+                            userData.multiplier += 4;
                         }
                     }
-                    
+                    else if (MouseX >= 720 && MouseX <= 790 && MouseY >= 250 && MouseY <= 316 && isUnlocked[2])
+                    {
+                        if (mpz_cmp_ui(userData.score, 50 * pow(userData.multiplier, 3)) >= 0)
+                        {
+                            mpz_sub_ui(userData.score, userData.score, 50 * pow(userData.multiplier, 3));
+                            userData.multiplier += 8;
+                        }
+                    }
+                    else if (MouseX >= 720 && MouseX <= 790 && MouseY >= 338 && MouseY <= 400 && isUnlocked[3])
+                    {
+                        if (mpz_cmp_ui(userData.score, 50 * pow(userData.multiplier, 4)) >= 0)
+                        {
+                            mpz_sub_ui(userData.score, userData.score, 50 * pow(userData.multiplier, 4));
+                            userData.multiplier += 16;
+                        }
+                    }
+                    else if (MouseX >= 720 && MouseX <= 790 && MouseY >= 423 && MouseY <= 486 && isUnlocked[4])
+                    {
+                       if (mpz_cmp_ui(userData.score, 50 * pow(userData.multiplier, 5)) >= 0)
+                        {
+                            mpz_sub_ui(userData.score, userData.score, 50 * pow(userData.multiplier, 5));
+                            userData.multiplier += 32;
+                        }
+                    }
+
                     break;
                 }
             }
@@ -592,7 +604,6 @@ int main(int argc, char *argv[])
             {
                 quit = true;
             }
-            
         }
         // Update game logic based on user input or other factors
         if (set == MENU_OPTIONS)
@@ -623,22 +634,25 @@ int main(int argc, char *argv[])
                 initialized = false;
             }
         }
-        else if(set == MENU_SHOP)
+        else if (set == MENU_SHOP)
         {
-            if (userData.level >=10)
+            if (userData.level >= 50)
             {
                 isUnlocked[0] = true;
-            }if (userData.level >=30)
+            }
+            if (userData.level >= 100)
             {
                 isUnlocked[1] = true;
             }
-            if (userData.level >=50)
+            if (userData.level >= 500)
             {
                 isUnlocked[2] = true;
-            }if (userData.level >=70)
+            }
+            if (userData.level >= 1000)
             {
                 isUnlocked[3] = true;
-            }if (userData.level >=100)
+            }
+            if (userData.level >= 10000)
             {
                 isUnlocked[4] = true;
             }
@@ -647,13 +661,9 @@ int main(int argc, char *argv[])
                 mpz_add_ui(userData.score, userData.score, 300);
                 userData.isNewbie = true;
                 updateUserData(username, &userData);
-                
             }
-            
-            
-            
         }
-        
+
         // Render game objects based on the updated game logic
         if (set == MAIN_MENU)
         {
@@ -1326,9 +1336,9 @@ void initRocks(Rock *rocks)
     {
         rocks[i].x = (i % 2 == 0) ? 0 : 740;     // Alternate between left and right side
         rocks[i].y = rand() % WINDOW_HEIGHT + 1; // Random starting y position
-        rocks[i].speedY = rand() % 5 + 1;         // Random speed between 1 and 5
+        rocks[i].speedY = rand() % 5 + 1;        // Random speed between 1 and 5
         rocks[i].speedX = rand() % 5 + 1;
-        rocks[i].size = rand() % 20 + 10;        // Random size between 10 and 30
+        rocks[i].size = rand() % 20 + 10; // Random size between 10 and 30
     }
 }
 
@@ -1346,7 +1356,7 @@ void updateRocks(Rock *rocks)
         }
 
         rocks[i].y += rocks[i].speedY * (rand() % 2 + 1);
-        rocks[i].x += rocks[i].speedX * (rand()% 2 + 1);
+        rocks[i].x += rocks[i].speedX * (rand() % 2 + 1);
 
         SDL_Rect rockRect = {rocks[i].x, rocks[i].y, 3 * rocks[i].size, 3 * rocks[i].size};
         SDL_RenderCopy(renderer, rockTexture, NULL, &rockRect);

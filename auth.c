@@ -19,16 +19,16 @@ bool authenticateUser(const char *username, const char *password, Data *storedDa
     {
         char storedUsername[MAX_USERNAME_LENGTH];
         char storedPassword[MAX_PASSWORD_LENGTH];
-        char storedMultiplier[10];
+        int storedMultiplier;
         int storedLevel;
         int storedIsNewbie;
         char* storedScore = NULL;
 
-        sscanf(buffer, "%[^;];%[^;];%[^;];%d;%d;%ms", storedUsername, storedPassword, storedMultiplier, &storedLevel, &storedIsNewbie, &storedScore);
+        sscanf(buffer, "%[^;];%[^;];%lld;%d;%d;%ms", storedUsername, storedPassword, &storedMultiplier, &storedLevel, &storedIsNewbie, &storedScore);
 
         if (strcmp(username, storedUsername) == 0 && strcmp(password, storedPassword) == 0)
         {
-            storedData->multiplier = atof(storedMultiplier);
+            storedData->multiplier = storedMultiplier;
             storedData->level = storedLevel;
             storedData->isNewbie = storedIsNewbie;
             mpz_init_set_str(storedData->score, storedScore, 10);
@@ -108,7 +108,8 @@ bool registerUser(const char *username, const char *password, Data *userData)
     char *scoreStr;
     gmp_asprintf(&scoreStr, "%Zd", userData->score);
 
-    fprintf(file, "%s;%s;%.2f;%d;%d;%s\n", username, password, userData->multiplier, userData->level, userData->isNewbie, scoreStr);
+    userData->multiplier = 1;
+    fprintf(file, "%s;%s;%lld;%d;%d;%s\n", username, password, userData->multiplier, userData->level, userData->isNewbie, scoreStr);
 
     fclose(file);
 
