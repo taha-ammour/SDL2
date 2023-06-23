@@ -1,6 +1,59 @@
 #include "file/Auth.h"
 #include "file/shop.h"
 
+
+char* formatNumberWithSuffix(mpz_t number) {
+    mpz_t base;
+    mpz_init(base);
+    mpz_set_ui(base, 1000);
+
+    char* suffixes[] = {"", "k", "M", "B", "T"};
+    int suffixIndex = 0;
+
+    mpz_t quotient, remainder;
+    mpz_init(quotient);
+    mpz_init(remainder);
+
+    mpz_tdiv_qr(quotient, remainder, number, base);
+    while (mpz_cmp_ui(quotient, 0) >= 1 && suffixIndex < sizeof(suffixes) / sizeof(suffixes[0]) - 1) {
+        mpz_tdiv_qr(quotient, remainder, quotient, base);
+        suffixIndex++;
+    }
+
+    char numberString[BUFFER_SIZE];
+    mpz_get_str(numberString, 10, number);
+    size_t length = strlen(numberString);
+
+    size_t bufferSize = BUFFER_SIZE;
+    char* formattedNumber = (char*)malloc(bufferSize * sizeof(char));
+    if (formattedNumber == NULL) {
+        // Handle memory allocation failure
+        mpz_clears(base, quotient, remainder, NULL);
+        return NULL;
+    }
+
+    if (suffixIndex > 0) {
+        int decimalIndex = length % 3;
+        if (decimalIndex == 0)
+            decimalIndex = 3;
+
+        memmove(numberString + decimalIndex + 1, numberString + decimalIndex, length - decimalIndex + 1);
+        numberString[decimalIndex] = '.';
+
+        size_t suffixLength = strlen(suffixes[suffixIndex]);
+        if (length + suffixLength + 4 < BUFFER_SIZE) {  // Increase buffer size to accommodate the decimal places and suffix
+            snprintf(numberString + length + 1, 4, "%.2s", suffixes[suffixIndex]);
+        }
+    }
+
+    strncpy(formattedNumber, numberString, bufferSize - 1);
+    formattedNumber[bufferSize - 1] = '\0';
+
+    mpz_clears(base, quotient, remainder, NULL);
+    return formattedNumber;
+}
+
+
 bool updateUserData(const char *username, const Data *userData)
 {
     // Open the file in read mode to check if the user exists
@@ -96,7 +149,9 @@ void drawshop(SDL_Renderer *renderer, TTF_Font *font, Data *userdata, bool isUnl
     char *scoreStr;
     gmp_asprintf(&scoreStr, "score: %Zd", userdata->score);
 
-    text_surface = TTF_RenderText_Blended(font, scoreStr, color);
+    char* result = formatNumberWithSuffix(userdata->score);
+
+    text_surface = TTF_RenderText_Blended(font, result, color);
     text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
     text_rect.x = 0;
     text_rect.y = 0;

@@ -237,7 +237,7 @@ int main(int argc, char *argv[])
                         selected_item = MENU_START_GAME;
                         if (Mix_Playing(-1) == 0)
                         {
-                            Mix_PlayChannel(-1, HIT, 0);
+                            Mix_PlayChannel(-1, Clicksound, 0);
                         }
                     }
                     else if (MouseX >= 285 && MouseX <= 478 && MouseY >= 205 && MouseY <= 247)
@@ -245,7 +245,7 @@ int main(int argc, char *argv[])
                         selected_item = MENU_OPTIONS;
                         if (Mix_Playing(-1) == 0)
                         {
-                            Mix_PlayChannel(-1, HIT, 0);
+                            Mix_PlayChannel(-1, Clicksound, 0);
                         }
                     }
                     else if (MouseX >= 314 && MouseX <= 435 && MouseY >= 258 && MouseY <= 301)
@@ -253,7 +253,7 @@ int main(int argc, char *argv[])
                         selected_item = MENU_SHOP;
                         if (Mix_Playing(-1) == 0)
                         {
-                            Mix_PlayChannel(-1, HIT, 0);
+                            Mix_PlayChannel(-1, Clicksound, 0);
                         }
                     }
                     else if (MouseX >= 315 && MouseX <= 430 && MouseY >= 314 && MouseY <= 345)
@@ -261,7 +261,7 @@ int main(int argc, char *argv[])
                         selected_item = MENU_QUIT;
                         if (Mix_Playing(-1) == 0)
                         {
-                            Mix_PlayChannel(-1, HIT, 0);
+                            Mix_PlayChannel(-1, Clicksound, 0);
                         }
                     }
 
@@ -276,17 +276,17 @@ int main(int argc, char *argv[])
                     else if (MouseX >= 285 && MouseX <= 478 && MouseY >= 205 && MouseY <= 247)
                     {
                         set = MENU_OPTIONS;
-                        Mix_PlayChannel(-1, Clicksound, 0);
+                        Mix_PlayChannel(-1, HIT, 0);
                     }
                     else if (MouseX >= 314 && MouseX <= 435 && MouseY >= 258 && MouseY <= 301)
                     {
                         set = MENU_SHOP;
-                        Mix_PlayChannel(-1, Clicksound, 0);
+                        Mix_PlayChannel(-1, HIT, 0);
                     }
                     else if (MouseX >= 315 && MouseX <= 430 && MouseY >= 314 && MouseY <= 345)
                     {
                         set = MENU_QUIT;
-                        Mix_PlayChannel(-1, Clicksound, 0);
+                        Mix_PlayChannel(-1, HIT, 0);
                     }
                     break;
                 }
@@ -557,6 +557,34 @@ int main(int argc, char *argv[])
                     int MouseY = event.button.y;
                     Uint32 mouseState = SDL_GetMouseState(&MouseX, &MouseY);
                     printf("Mouse x :%d, Mouse y: %d\n",MouseX,MouseY);
+                    if (MouseX >= 720 && MouseX <= 790 && MouseY >= 79 && MouseY <= 143)
+                    {
+                        if (isUnlocked[0]){
+                            
+                        }
+                    }else if (MouseX >= 720 && MouseX <= 790 && MouseY >= 164 && MouseY <= 228)
+                    {
+                        if (isUnlocked[1]){
+                            
+                        }
+                    }
+                    else if (MouseX >= 720 && MouseX <= 790 && MouseY >= 250 && MouseY <= 316)
+                    {
+                        if (isUnlocked[2]){
+                            
+                        }
+                    }else if (MouseX >= 720 && MouseX <= 790 && MouseY >= 338 && MouseY <= 400)
+                    {
+                        if (isUnlocked[3]){
+                            
+                        }
+                    }else if (MouseX >= 720 && MouseX <= 790 && MouseY >= 423 && MouseY <= 486)
+                    {
+                        if (isUnlocked[4]){
+                            
+                        }
+                    }
+                    
                     break;
                 }
             }

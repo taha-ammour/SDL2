@@ -17,9 +17,10 @@ typedef struct {
     bool isNewbie;
 } Data;
 extern TTF_Font* font18;
+#define BUFFER_SIZE 1024
 
 bool updateUserData(const char *username, const Data *userData);
-const char* getSuffix(int exponent);
+char* formatNumberWithSuffix(mpz_t number);
 void drawshop(SDL_Renderer* renderer,TTF_Font* font ,Data* userdata, bool isUnlocked[]);
 
 
