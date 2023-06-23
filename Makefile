@@ -2,14 +2,14 @@
 
 # Compiler and linker flags
 CFLAGS = -I src/include -L src/lib
-LIBS = -lmingw32 -lSDL2main -lSDL2 -lSDL2_TTF -lSDL2_image -lSDL2_mixer
+LIBS = -lmingw32 -lSDL2main -lSDL2 -lSDL2_TTF -lSDL2_image -lSDL2_mixer -lgmp
 
 # Default target
 all: main
 
 # Build target for app
-main: main.c auth.c
-	gcc $(CFLAGS) -o main main.c auth.c  $(LIBS)
+main: main.c auth.c shop.c
+	gcc $(CFLAGS) -o main main.c auth.c shop.c $(LIBS)
 
 # Build target for debugging
 debug: CFLAGS += -g

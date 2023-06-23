@@ -18,7 +18,7 @@ typedef struct {
 } User;
 
 
-bool authenticateUser(const char* username, const char* password);
+bool authenticateUser(const char* username, const char* password, Data* userData);
 bool registerUser(const char* username, const char* password);
 
 void createAuthwin(SDL_Renderer* renderer, TTF_Font* font, const char* username, const char* password);

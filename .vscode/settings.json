@@ -31,6 +31,7 @@
         "auth.h": "c",
         "stdio.h": "c",
         "sdl_ttf.h": "c",
-        "gmp.h": "c"
+        "gmp.h": "c",
+        "shop.h": "c"
     }
 }

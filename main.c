@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <gmp.h>
 #include "file/Auth.h"
+#include "file/shop.h"
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 500
@@ -50,6 +51,8 @@ int set = MENU_AUTH;
 const int easylivetry = 9;
 const int medlivetry = 6;
 const int hardlivetry = 3;
+
+Data userData;
 
 int livesrem;
 
@@ -166,8 +169,10 @@ int main(int argc, char *argv[])
     int correct_guesses = 0;
     bool select_user = false;
     bool select_pass = false;
+
     char username[100] = {0};
     char password[100] = {0};
+
     while (!quit)
     {
         SDL_Event event;
@@ -426,7 +431,7 @@ int main(int argc, char *argv[])
                     {
 
                         // Authenticate the credentials
-                        bool isAuthenticated = authenticateUser(username, password);
+                        bool isAuthenticated = authenticateUser(username, password , &userData);
                         if (isAuthenticated)
                         {
                             printf("Login successful!\n");
@@ -554,7 +559,9 @@ int main(int argc, char *argv[])
                 updateStars(stars);
                 score_txt(font28, score, WINDOW_WIDTH - 200, 0);
                 draw_txt_g(font28, word, guessed_letters);
-                draw_admin(font28, true, word);
+                if(!strcmp(username, "admin")){
+                    draw_admin(font28, true, word);
+                }
                 draw_tries(font28, selected_options, incorrect_guesses);
                 drawHangman(incorrect_guesses, selected_options);
             }
