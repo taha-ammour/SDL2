@@ -16,7 +16,11 @@ typedef struct {
     int level;
     bool isNewbie;
 } Data;
+extern TTF_Font* font18;
+
 bool updateUserData(const char *username, const Data *userData);
 const char* getSuffix(int exponent);
-void drawshop(SDL_Renderer* renderer,TTF_Font* font ,Data* userdata);
+void drawshop(SDL_Renderer* renderer,TTF_Font* font ,Data* userdata, bool isUnlocked[]);
+
+
 #endif 

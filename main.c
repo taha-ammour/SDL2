@@ -21,6 +21,7 @@ SDL_Color black = {0, 0, 0};
 
 TTF_Font *font38;
 TTF_Font *font28;
+TTF_Font *font18;
 
 SDL_Texture *startexture;
 SDL_Texture *rockTexture;
@@ -75,7 +76,8 @@ typedef struct
 {
     int x;
     int y;
-    float speed;
+    float speedX;
+    float speedY;
     float size;
 } Rock;
 
@@ -173,6 +175,13 @@ int main(int argc, char *argv[])
     int correct_guesses = 0;
     bool select_user = false;
     bool select_pass = false;
+    bool isUnlocked[5] ={false};
+
+    for (int i = 0; i < 5; i++)
+    {
+        isUnlocked[i] = false;
+    }
+    
 
     while (!quit)
     {
@@ -544,6 +553,10 @@ int main(int argc, char *argv[])
                     }
                     break;
                 case SDL_MOUSEBUTTONDOWN:
+                    int MouseX = event.button.x;
+                    int MouseY = event.button.y;
+                    Uint32 mouseState = SDL_GetMouseState(&MouseX, &MouseY);
+                    printf("Mouse x :%d, Mouse y: %d\n",MouseX,MouseY);
                     break;
                 }
             }
@@ -582,7 +595,37 @@ int main(int argc, char *argv[])
                 initialized = false;
             }
         }
-
+        else if(set == MENU_SHOP)
+        {
+            if (userData.level >=10)
+            {
+                isUnlocked[0] = true;
+            }if (userData.level >=30)
+            {
+                isUnlocked[1] = true;
+            }
+            if (userData.level >=50)
+            {
+                isUnlocked[2] = true;
+            }if (userData.level >=70)
+            {
+                isUnlocked[3] = true;
+            }if (userData.level >=100)
+            {
+                isUnlocked[4] = true;
+            }
+            if (!userData.isNewbie)
+            {
+                mpz_add_ui(userData.score, userData.score, 300);
+                userData.isNewbie = true;
+                updateUserData(username, &userData);
+                
+            }
+            
+            
+            
+        }
+        
         // Render game objects based on the updated game logic
         if (set == MAIN_MENU)
         {
@@ -632,7 +675,7 @@ int main(int argc, char *argv[])
         }
         if (set == MENU_SHOP)
         {
-            drawshop(renderer, font28, &userData);
+            drawshop(renderer, font28, &userData, isUnlocked);
         }
 
         SDL_RenderPresent(renderer);
@@ -644,6 +687,8 @@ int main(int argc, char *argv[])
     Mix_CloseAudio();
     Mix_Quit();
     TTF_CloseFont(font38);
+    TTF_CloseFont(font28);
+    TTF_CloseFont(font18);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     TTF_Quit();
@@ -1148,7 +1193,8 @@ void Sdlinti()
 
     font28 = TTF_OpenFont("fonts/Talk Comic.ttf", 28);
     font38 = TTF_OpenFont("fonts/Talk Comic.ttf", 38);
-    if (!font28 || !font38)
+    font18 = TTF_OpenFont("fonts/Talk Comic.ttf", 18);
+    if (!font28 || !font38 || !font18)
     {
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(window);
@@ -1252,7 +1298,8 @@ void initRocks(Rock *rocks)
     {
         rocks[i].x = (i % 2 == 0) ? 0 : 740;     // Alternate between left and right side
         rocks[i].y = rand() % WINDOW_HEIGHT + 1; // Random starting y position
-        rocks[i].speed = rand() % 5 + 1;         // Random speed between 1 and 5
+        rocks[i].speedY = rand() % 5 + 1;         // Random speed between 1 and 5
+        rocks[i].speedX = rand() % 5 + 1;
         rocks[i].size = rand() % 20 + 10;        // Random size between 10 and 30
     }
 }
@@ -1263,10 +1310,15 @@ void updateRocks(Rock *rocks)
     {
         if (rocks[i].y < 0 || rocks[i].y >= WINDOW_HEIGHT - (3 * rocks[i].size))
         {
-            rocks[i].speed = -rocks[i].speed; // Reverse the direction of the rock
+            rocks[i].speedY = -rocks[i].speedY; // Reverse the direction of the rock
+        }
+        if (rocks[i].x < 0 || rocks[i].x >= WINDOW_WIDTH - (3 * rocks[i].size))
+        {
+            rocks[i].speedX = -rocks[i].speedX; // Reverse the direction of the rock
         }
 
-        rocks[i].y += rocks[i].speed * (rand() % 2 + 1);
+        rocks[i].y += rocks[i].speedY * (rand() % 2 + 1);
+        rocks[i].x += rocks[i].speedX * (rand()% 2 + 1);
 
         SDL_Rect rockRect = {rocks[i].x, rocks[i].y, 3 * rocks[i].size, 3 * rocks[i].size};
         SDL_RenderCopy(renderer, rockTexture, NULL, &rockRect);

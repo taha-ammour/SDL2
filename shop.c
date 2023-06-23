@@ -48,14 +48,14 @@ bool updateUserData(const char *username, const Data *userData)
     while (fgets(buffer, sizeof(buffer), file) != NULL)
     {
         char storedUsername[MAX_USERNAME_LENGTH];
-        char storedPassword[MAX_USERNAME_LENGTH];
+        char storedPassword[MAX_PASSWORD_LENGTH];
 
         sscanf(buffer, "%[^;];%[^;];", storedUsername, storedPassword);
 
         if (strcmp(username, storedUsername) == 0)
         {
-            char *scoreStr;
-            gmp_asprintf(&scoreStr, "%Zd", userData->score);
+            char scoreStr[MAX_USERNAME_LENGTH];
+            gmp_sprintf(scoreStr, "%Zd", userData->score);
             fprintf(tempFile, "%s;%s;%.2f;%d;%d;%s\n", username, storedPassword, userData->multiplier, userData->level, userData->isNewbie, scoreStr);
         }
         else
@@ -84,7 +84,7 @@ bool updateUserData(const char *username, const Data *userData)
     return true;
 }
 
-void drawshop(SDL_Renderer *renderer, TTF_Font *font, Data *userdata)
+void drawshop(SDL_Renderer *renderer, TTF_Font *font, Data *userdata, bool isUnlocked[])
 {
     SDL_Color color = {255, 255, 255, 255};
     SDL_Surface *text_surface;
@@ -132,13 +132,124 @@ void drawshop(SDL_Renderer *renderer, TTF_Font *font, Data *userdata)
     int y = 72;
     for (int i = 0; i < 5; i++)
     {
-        for (int j = 0; j < 5; j++)
+        if (isUnlocked[i])
         {
             SDL_Rect itemRect = {0, y, 800, 76};
             SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255);
             SDL_RenderFillRect(renderer, &itemRect);
-        }
-        y += 86;
-    }
+            char textshow[100];
 
+            switch (i)
+            {
+            case 0:
+                int co = 1;
+                float mult = .2;
+                sprintf(textshow, "up %d unlocked buy %02.2f multiplier for 50", co, mult);
+                break;
+            case 1:
+                mult = .8;
+                co++;
+                sprintf(textshow, "up %d unlocked buy %02.2f multiplier for 250", co, mult);
+                break;
+            case 2:
+                mult = 1.6;
+                co++;
+                sprintf(textshow, "up %d unlocked buy %02.2f multiplier for 1000", co, mult);
+                break;
+            case 3:
+                mult = 3.2;
+                co++;
+                sprintf(textshow, "up %d unlocked buy %02.2f multiplier for 10.000", co, mult);
+                break;
+            case 4:
+                mult = 10.4;
+                co++;
+                sprintf(textshow, "up %d unlocked buy %02.2f multiplier for 100.000", co, mult);
+
+                break;
+            }
+            text_surface = TTF_RenderText_Blended(font18, textshow, color);
+            text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
+            text_rect.x = (800 - text_surface->w) / 4 + 70;
+            text_rect.y = y;
+            text_rect.w = text_surface->w;
+            text_rect.h = text_surface->h;
+
+            SDL_RenderCopy(renderer, text_texture, NULL, &text_rect);
+            SDL_FreeSurface(text_surface);
+            SDL_DestroyTexture(text_texture);
+            y += 86;
+        }
+        else
+        {
+            SDL_Rect itemRect = {0, y, 800, 76};
+            SDL_SetRenderDrawColor(renderer, 100, 100, 100, 100);
+            SDL_RenderFillRect(renderer, &itemRect);
+            switch (i)
+            {
+            case 0:
+                text_surface = TTF_RenderText_Blended(font, "Not Unlocked Req lvl 10", color);
+                break;
+
+            case 1:
+                text_surface = TTF_RenderText_Blended(font, "Not Unlocked Req lvl 30", color);
+                break;
+            case 2:
+                text_surface = TTF_RenderText_Blended(font, "Not Unlocked Req lvl 50", color);
+                break;
+            case 3:
+                text_surface = TTF_RenderText_Blended(font, "Not Unlocked Req lvl 70", color);
+                break;
+            case 4:
+                text_surface = TTF_RenderText_Blended(font, "Not Unlocked Req lvl 100", color);
+                break;
+            }
+
+            text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
+            text_rect.x = (800 - text_surface->w) / 2;
+            text_rect.y = y;
+            text_rect.w = text_surface->w;
+            text_rect.h = text_surface->h;
+
+            SDL_RenderCopy(renderer, text_texture, NULL, &text_rect);
+            SDL_FreeSurface(text_surface);
+            SDL_DestroyTexture(text_texture);
+            y += 86;
+        }
+    }
+    y = 77;
+    for (int i = 0; i < 5; i++)
+    {
+        if (isUnlocked[i])
+        {
+            SDL_Rect itemRect = {10, y, 70, 65};
+            SDL_SetRenderDrawColor(renderer, 150, 150, 150, 255);
+            SDL_RenderFillRect(renderer, &itemRect);
+
+            y += 86;
+        }
+    }
+    y = 77;
+    for (int i = 0; i < 5; i++)
+    {
+        if (isUnlocked[i])
+        {
+            SDL_Rect itemRect = {720, y, 70, 65};
+            SDL_SetRenderDrawColor(renderer, 150, 150, 150, 255);
+            SDL_RenderFillRect(renderer, &itemRect);
+            text_surface = TTF_RenderText_Blended(font, "BUY", color);
+            text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
+            text_rect.x = itemRect.x;
+            text_rect.y = itemRect.y;
+            text_rect.w = text_surface->w;
+            text_rect.h = text_surface->h;
+
+            SDL_RenderCopy(renderer, text_texture, NULL, &text_rect);
+            SDL_FreeSurface(text_surface);
+            SDL_DestroyTexture(text_texture);
+
+            y += 86;
+        }
+    }
 }
+

@@ -13,11 +13,6 @@
 #define MAX_USERNAME_LENGTH 50
 #define MAX_PASSWORD_LENGTH 50
 
-typedef struct {
-    char username[MAX_USERNAME_LENGTH];
-    char password[MAX_PASSWORD_LENGTH];
-} User;
-
 
 bool authenticateUser(const char* username, const char* password, Data* userData);
 bool registerUser(const char* username, const char* password, Data* userData);
