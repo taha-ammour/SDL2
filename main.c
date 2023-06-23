@@ -87,7 +87,7 @@ void Sdlinti();
 char *getRandomWord(const char *filename);
 void score_txt(TTF_Font *font, int score, int x, int y);
 Uint32 timer_callback(Uint32 interval, void *param);
-void draw_menu(TTF_Font *font38, int selected_item, int selected_options);
+void draw_menu(TTF_Font *font38, int selected_item, int selected_options, char * usernam);
 void draw_txt(TTF_Font *font38, const char *timer_text, int x, int y);
 void draw_txt_g(TTF_Font *font38, const char *timer_text, bool *guessed_letters);
 void draw_options(TTF_Font *font38, int selected_options);
@@ -667,7 +667,7 @@ int main(int argc, char *argv[])
         // Render game objects based on the updated game logic
         if (set == MAIN_MENU)
         {
-            draw_menu(font38, selected_item, selected_options);
+            draw_menu(font38, selected_item, selected_options, username);
             updateStars(stars);
         }
         if (set == MENU_OPTIONS)
@@ -734,7 +734,7 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-void draw_menu(TTF_Font *font38, int selected_item, int selected_options)
+void draw_menu(TTF_Font *font38, int selected_item, int selected_options, char * usernam)
 {
     SDL_Color color = {255, 255, 255, 255};
     SDL_Surface *text_surface;
@@ -749,6 +749,17 @@ void draw_menu(TTF_Font *font38, int selected_item, int selected_options)
     text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
     text_rect.x = 170;
     text_rect.y = 50;
+    text_rect.w = text_surface->w;
+    text_rect.h = text_surface->h;
+    SDL_RenderCopy(renderer, text_texture, NULL, &text_rect);
+    SDL_FreeSurface(text_surface);
+    SDL_DestroyTexture(text_texture);
+    char user[100];
+    sprintf(user,"username : %s", usernam);
+    text_surface = TTF_RenderText_Blended(font28, user, (selected_item == MENU_AUTH) ? color : (SDL_Color){128, 128, 128, 255});
+    text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
+    text_rect.x = 320;
+    text_rect.y = 300;
     text_rect.w = text_surface->w;
     text_rect.h = text_surface->h;
     SDL_RenderCopy(renderer, text_texture, NULL, &text_rect);
