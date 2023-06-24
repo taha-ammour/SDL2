@@ -113,7 +113,7 @@ bool updateUserData(const char *username, const Data *userData)
         {
             char scoreStr[MAX_USERNAME_LENGTH];
             gmp_sprintf(scoreStr, "%Zd", userData->score);
-            fprintf(tempFile, "%s;%s;%ld;%d;%d;%s\n", username, storedPassword, userData->multiplier, userData->level, userData->isNewbie, scoreStr);
+            fprintf(tempFile, "%s;%s;%lld;%d;%d;%d;%s\n", username, storedPassword, userData->multiplier,userData->diffadd, userData->level, userData->isNewbie, scoreStr);
         }
         else
         {

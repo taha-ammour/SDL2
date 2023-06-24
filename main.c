@@ -55,9 +55,11 @@ int set = MENU_AUTH;
 char username[100] = {0};
 char password[100] = {0};
 
-const int easylivetry = 9;
-const int medlivetry = 6;
-const int hardlivetry = 3;
+int easymode = 9;
+int mediummode = 6;
+int hardmode = 3;
+
+int diffinco = 9;
 
 int livesrem;
 
@@ -126,7 +128,6 @@ int main(int argc, char *argv[])
     bool timer_started = false;
     char timer_text[32];
     livesrem = 100 / 9;
-    int diffinco = 9;
 
     Star stars[100];
     for (int i = 0; i < 100; i++)
@@ -230,7 +231,7 @@ int main(int argc, char *argv[])
                     int MouseX = event.button.x;
                     int MouseY = event.button.y;
                     Uint32 mouseState = SDL_GetMouseState(&MouseX, &MouseY);
-
+                    printf("Mouse X: %d, Mouse Y: %d", MouseX, MouseY);
                     if (MouseX >= 240 && MouseX <= 526 && MouseY >= 160 && MouseY <= 200)
                     {
                         selected_item = MENU_START_GAME;
@@ -263,6 +264,7 @@ int main(int argc, char *argv[])
                             Mix_PlayChannel(-1, Clicksound, 0);
                         }
                     }
+                    
 
                     break;
                 case SDL_MOUSEBUTTONDOWN:
@@ -355,17 +357,17 @@ int main(int argc, char *argv[])
                             case EASY:
                                 counter = 6 * 60;
                                 livesrem = 100 / 9;
-                                diffinco = 9;
+                                diffinco = easymode + userData.diffadd;
                                 break;
                             case MED:
                                 counter = 4 * 60;
                                 livesrem = 100 / 6;
-                                diffinco = 6;
+                                diffinco = mediummode + userData.diffadd;
                                 break;
                             case HARD:
                                 counter = 3 * 60;
                                 livesrem = 100 / 3;
-                                diffinco = 3;
+                                diffinco = hardmode + userData.diffadd;
                                 break;
                             }
                             Mix_PlayChannel(-1, Reset_sound, 0);
@@ -436,7 +438,7 @@ int main(int argc, char *argv[])
                                     {
                                         correct_guesses_letters[correct_guesses] = letter;
                                         correct_guesses++;
-                                        score += livesrem;
+                                        score += (1 * userData.multiplier);
                                         Mix_PlayChannel(-1, TRUEWAV, 0);
                                     }
                                 }
@@ -578,6 +580,7 @@ int main(int argc, char *argv[])
                         {
                             mpz_sub_ui(userData.score, userData.score, 50 * pow(userData.multiplier, 3));
                             userData.multiplier += 8;
+                            userData.diffadd ++;
                         }
                     }
                     else if (MouseX >= 720 && MouseX <= 790 && MouseY >= 338 && MouseY <= 400 && isUnlocked[3])
@@ -586,6 +589,7 @@ int main(int argc, char *argv[])
                         {
                             mpz_sub_ui(userData.score, userData.score, 50 * pow(userData.multiplier, 4));
                             userData.multiplier += 16;
+                            userData.diffadd += 2;
                         }
                     }
                     else if (MouseX >= 720 && MouseX <= 790 && MouseY >= 423 && MouseY <= 486 && isUnlocked[4])
@@ -594,6 +598,7 @@ int main(int argc, char *argv[])
                         {
                             mpz_sub_ui(userData.score, userData.score, 50 * pow(userData.multiplier, 5));
                             userData.multiplier += 32;
+                            userData.diffadd += 3;
                         }
                     }
 
@@ -613,17 +618,17 @@ int main(int argc, char *argv[])
             case EASY:
                 counter = 6 * 60;
                 livesrem = 100 / 9;
-                diffinco = 9;
+                diffinco = easymode + userData.diffadd;
                 break;
             case MED:
                 counter = 4 * 60;
                 livesrem = 100 / 6;
-                diffinco = 6;
+                diffinco = mediummode + userData.diffadd;
                 break;
             case HARD:
                 counter = 3 * 60;
                 livesrem = 100 / 3;
-                diffinco = 3;
+                diffinco = hardmode + userData.diffadd;
                 break;
             }
         }
@@ -758,8 +763,8 @@ void draw_menu(TTF_Font *font38, int selected_item, int selected_options, char *
     sprintf(user,"username : %s", usernam);
     text_surface = TTF_RenderText_Blended(font28, user, (selected_item == MENU_AUTH) ? color : (SDL_Color){128, 128, 128, 255});
     text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
-    text_rect.x = 320;
-    text_rect.y = 300;
+    text_rect.x = 790 - text_surface->w;
+    text_rect.y = 380;
     text_rect.w = text_surface->w;
     text_rect.h = text_surface->h;
     SDL_RenderCopy(renderer, text_texture, NULL, &text_rect);
@@ -770,7 +775,7 @@ void draw_menu(TTF_Font *font38, int selected_item, int selected_options, char *
     sprintf(text_difficulty, "Difficulty : %s", (selected_options == EASY) ? " Easy" : ((selected_options == MED) ? "Medium" : "Hard"));
     text_surface = TTF_RenderText_Blended(font28, text_difficulty, color);
     text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
-    text_rect.x = 440;
+    text_rect.x = 790- text_surface->w;
     text_rect.y = 420;
     text_rect.w = text_surface->w;
     text_rect.h = text_surface->h;
@@ -1182,8 +1187,7 @@ bool check_game_over(bool *guessed_letters, int word_length)
 void draw_tries(TTF_Font *font, int selected_options, int try)
 {
     char try_str[32];
-    sprintf(try_str, "Tries: %d:%s", try, (selected_options == EASY) ? "9" : (selected_options == MED) ? "6"
-                                                                                                       : "3");
+    sprintf(try_str, "Tries: %d:%d", try, diffinco);
     SDL_Color color = {255, 255, 255, 255};
     SDL_Surface *surface = TTF_RenderText_Blended(font, try_str, color);
     SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);

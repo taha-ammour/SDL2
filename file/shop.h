@@ -14,6 +14,7 @@ typedef struct {
     mpz_t score;
     size_t multiplier;
     int level;
+    int diffadd;
     bool isNewbie;
 } Data;
 extern TTF_Font* font18;
