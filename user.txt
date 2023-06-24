@@ -1,1 +1,1 @@
-admin;admin;1;0;0;1;300
+admin;admin;245;5;724;1;0

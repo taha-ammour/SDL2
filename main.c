@@ -89,7 +89,7 @@ void Sdlinti();
 char *getRandomWord(const char *filename);
 void score_txt(TTF_Font *font, int score, int x, int y);
 Uint32 timer_callback(Uint32 interval, void *param);
-void draw_menu(TTF_Font *font38, int selected_item, int selected_options, char * usernam);
+void draw_menu(TTF_Font *font38, int selected_item, int selected_options, char *usernam);
 void draw_txt(TTF_Font *font38, const char *timer_text, int x, int y);
 void draw_txt_g(TTF_Font *font38, const char *timer_text, bool *guessed_letters);
 void draw_options(TTF_Font *font38, int selected_options);
@@ -178,10 +178,6 @@ int main(int argc, char *argv[])
     bool select_pass = false;
     bool isUnlocked[5] = {false};
 
-    for (int i = 0; i < 5; i++)
-    {
-        isUnlocked[i] = false;
-    }
 
     while (!quit)
     {
@@ -262,7 +258,8 @@ int main(int argc, char *argv[])
                         {
                             Mix_PlayChannel(-1, Clicksound, 0);
                         }
-                    }else if (MouseX >= 482 && MouseX <= 794 && MouseY >= 391 && MouseY <= 414)
+                    }
+                    else if (MouseX >= 482 && MouseX <= 794 && MouseY >= 391 && MouseY <= 414)
                     {
                         selected_item = MENU_AUTH;
                         if (Mix_Playing(-1) == 0)
@@ -270,7 +267,6 @@ int main(int argc, char *argv[])
                             Mix_PlayChannel(-1, Clicksound, 0);
                         }
                     }
-                    
 
                     break;
                 case SDL_MOUSEBUTTONDOWN:
@@ -451,7 +447,8 @@ int main(int argc, char *argv[])
                                     {
                                         correct_guesses_letters[correct_guesses] = letter;
                                         correct_guesses++;
-                                        score += (selected_options == HARD)?(1 * userData.multiplier * 3):(selected_options == MED)?(1 * userData.multiplier * 2):(1 * userData.multiplier);
+                                        score += (selected_options == HARD) ? (1 * userData.multiplier * 3) : (selected_options == MED) ? (1 * userData.multiplier * 2)
+                                                                                                                                        : (1 * userData.multiplier);
                                         Mix_PlayChannel(-1, TRUEWAV, 0);
                                     }
                                 }
@@ -563,6 +560,8 @@ int main(int argc, char *argv[])
                     {
                     case SDLK_r:
                         set = MAIN_MENU;
+                        updateUserData(username, &userData);
+
                         break;
                     }
                     break;
@@ -593,10 +592,10 @@ int main(int argc, char *argv[])
                         {
                             mpz_sub_ui(userData.score, userData.score, 50 * pow(userData.multiplier, 3));
                             userData.multiplier += 8;
-                            if(userData.difadd < 5){
+                            if (userData.diffadd < 5)
+                            {
                                 userData.diffadd++;
                             }
-                            
                         }
                     }
                     else if (MouseX >= 720 && MouseX <= 790 && MouseY >= 338 && MouseY <= 400 && isUnlocked[3])
@@ -605,17 +604,15 @@ int main(int argc, char *argv[])
                         {
                             mpz_sub_ui(userData.score, userData.score, 50 * pow(userData.multiplier, 4));
                             userData.multiplier += 16;
-                            if (userData.difadd < 5)
+                            if (userData.diffadd < 5)
                             {
                                 userData.diffadd += 2;
                             }
-                            
-                            
                         }
                     }
                     else if (MouseX >= 720 && MouseX <= 790 && MouseY >= 423 && MouseY <= 486 && isUnlocked[4])
                     {
-                       if (mpz_cmp_ui(userData.score, 50 * pow(userData.multiplier, 5)) >= 0)
+                        if (mpz_cmp_ui(userData.score, 50 * pow(userData.multiplier, 5)) >= 0)
                         {
                             mpz_sub_ui(userData.score, userData.score, 50 * pow(userData.multiplier, 5));
                             userData.multiplier += 32;
@@ -623,7 +620,6 @@ int main(int argc, char *argv[])
                             {
                                 userData.diffadd += 3;
                             }
-                            
                         }
                     }
 
@@ -686,11 +682,14 @@ int main(int argc, char *argv[])
             {
                 isUnlocked[4] = true;
             }
+            if (userData.diffadd > 5)
+            {
+                userData.diffadd = 5;
+            }
             if (!userData.isNewbie)
             {
                 mpz_add_ui(userData.score, userData.score, 300);
                 userData.isNewbie = true;
-                updateUserData(username, &userData);
             }
         }
 
@@ -764,7 +763,7 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-void draw_menu(TTF_Font *font38, int selected_item, int selected_options, char * usernam)
+void draw_menu(TTF_Font *font38, int selected_item, int selected_options, char *usernam)
 {
     SDL_Color color = {255, 255, 255, 255};
     SDL_Surface *text_surface;
@@ -785,7 +784,7 @@ void draw_menu(TTF_Font *font38, int selected_item, int selected_options, char *
     SDL_FreeSurface(text_surface);
     SDL_DestroyTexture(text_texture);
     char user[100];
-    sprintf(user,"username : %s", usernam);
+    sprintf(user, "username : %s", usernam);
     text_surface = TTF_RenderText_Blended(font28, user, (selected_item == MENU_AUTH) ? color : (SDL_Color){128, 128, 128, 255});
     text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
     text_rect.x = 790 - text_surface->w;
@@ -800,7 +799,7 @@ void draw_menu(TTF_Font *font38, int selected_item, int selected_options, char *
     sprintf(text_difficulty, "Difficulty : %s", (selected_options == EASY) ? " Easy" : ((selected_options == MED) ? "Medium" : "Hard"));
     text_surface = TTF_RenderText_Blended(font28, text_difficulty, color);
     text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
-    text_rect.x = 790- text_surface->w;
+    text_rect.x = 790 - text_surface->w;
     text_rect.y = 420;
     text_rect.w = text_surface->w;
     text_rect.h = text_surface->h;
