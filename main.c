@@ -270,7 +270,7 @@ int main(int argc, char *argv[])
 
                     break;
                 case SDL_MOUSEBUTTONDOWN:
-                    printf("Mouse X: %d, Mouse Y: %d\n", MouseX, MouseY);
+                    // printf("Mouse X: %d, Mouse Y: %d\n", MouseX, MouseY);
 
                     if (MouseX >= 240 && MouseX <= 526 && MouseY >= 160 && MouseY <= 200)
                     {
@@ -569,7 +569,7 @@ int main(int argc, char *argv[])
                     int MouseX = event.button.x;
                     int MouseY = event.button.y;
                     Uint32 mouseState = SDL_GetMouseState(&MouseX, &MouseY);
-                    printf("Mouse x :%d, Mouse y: %d\n", MouseX, MouseY);
+                    // printf("Mouse x :%d, Mouse y: %d\n", MouseX, MouseY);
                     if (MouseX >= 720 && MouseX <= 790 && MouseY >= 79 && MouseY <= 143 && isUnlocked[0])
                     {
                         if (mpz_cmp_ui(userData.score, 50 * pow(userData.multiplier, 1)) >= 0)
