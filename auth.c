@@ -108,9 +108,13 @@ bool registerUser(const char *username, const char *password, Data *userData)
     }
 
     char *scoreStr;
+    mpz_set_ui(userData->score, 0);
     gmp_asprintf(&scoreStr, "%Zd", userData->score);
 
     userData->multiplier = 1;
+    userData->level = 0;
+    userData->isNewbie = 0;
+    
     fprintf(file, "%s;%s;%lld;%d;%d;%d;%s\n", username, password, userData->multiplier,userData->diffadd, userData->level, userData->isNewbie, scoreStr);
 
     fclose(file);
