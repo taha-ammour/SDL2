@@ -231,7 +231,6 @@ int main(int argc, char *argv[])
                     int MouseX = event.button.x;
                     int MouseY = event.button.y;
                     Uint32 mouseState = SDL_GetMouseState(&MouseX, &MouseY);
-                    printf("Mouse X: %d, Mouse Y: %d", MouseX, MouseY);
                     if (MouseX >= 240 && MouseX <= 526 && MouseY >= 160 && MouseY <= 200)
                     {
                         selected_item = MENU_START_GAME;
@@ -263,11 +262,19 @@ int main(int argc, char *argv[])
                         {
                             Mix_PlayChannel(-1, Clicksound, 0);
                         }
+                    }else if (MouseX >= 482 && MouseX <= 794 && MouseY >= 391 && MouseY <= 414)
+                    {
+                        selected_item = MENU_AUTH;
+                        if (Mix_Playing(-1) == 0)
+                        {
+                            Mix_PlayChannel(-1, Clicksound, 0);
+                        }
                     }
                     
 
                     break;
                 case SDL_MOUSEBUTTONDOWN:
+                    printf("Mouse X: %d, Mouse Y: %d\n", MouseX, MouseY);
 
                     if (MouseX >= 240 && MouseX <= 526 && MouseY >= 160 && MouseY <= 200)
                     {
@@ -289,6 +296,12 @@ int main(int argc, char *argv[])
                         set = MENU_QUIT;
                         Mix_PlayChannel(-1, HIT, 0);
                     }
+                    else if (MouseX >= 482 && MouseX <= 794 && MouseY >= 391 && MouseY <= 414)
+                    {
+                        set = MENU_AUTH;
+                        Mix_PlayChannel(-1, HIT, 0);
+                    }
+
                     break;
                 }
             }
@@ -438,7 +451,7 @@ int main(int argc, char *argv[])
                                     {
                                         correct_guesses_letters[correct_guesses] = letter;
                                         correct_guesses++;
-                                        score += (1 * userData.multiplier);
+                                        score += (selected_options == HARD)?(1 * userData.multiplier * 3):(selected_options == MED)?(1 * userData.multiplier * 2):(1 * userData.multiplier);
                                         Mix_PlayChannel(-1, TRUEWAV, 0);
                                     }
                                 }
@@ -1139,6 +1152,22 @@ void draw_txt_g(TTF_Font *font, const char *text, bool *guessed_letters)
     SDL_RenderCopy(renderer, texture, NULL, &rect);
     SDL_FreeSurface(surface);
     SDL_DestroyTexture(texture);
+
+    char Multlvl[100];
+    sprintf(Multlvl, "Mult: x%d.00", userData.multiplier);
+    SDL_Surface *text_surface;
+    SDL_Texture *text_texture;
+    SDL_Rect text_rect;
+    text_surface = TTF_RenderText_Blended(font18, Multlvl, color);
+    text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
+    text_rect.x = 0;
+    text_rect.y = (WINDOW_HEIGHT - text_surface->h);
+    text_rect.w = text_surface->w;
+    text_rect.h = text_surface->h;
+
+    SDL_RenderCopy(renderer, text_texture, NULL, &text_rect);
+    SDL_FreeSurface(text_surface);
+    SDL_DestroyTexture(text_texture);
 
     int x = 380;
     int y = 400;

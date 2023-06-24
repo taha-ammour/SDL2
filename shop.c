@@ -113,7 +113,7 @@ bool updateUserData(const char *username, const Data *userData)
         {
             char scoreStr[MAX_USERNAME_LENGTH];
             gmp_sprintf(scoreStr, "%Zd", userData->score);
-            fprintf(tempFile, "%s;%s;%lld;%d;%d;%d;%s\n", username, storedPassword, userData->multiplier,userData->diffadd, userData->level, userData->isNewbie, scoreStr);
+            fprintf(tempFile, "%s;%s;%lld;%d;%d;%d;%s\n", username, storedPassword, userData->multiplier, userData->diffadd, userData->level, userData->isNewbie, scoreStr);
         }
         else
         {
@@ -214,10 +214,16 @@ void drawshop(SDL_Renderer *renderer, TTF_Font *font, Data *userdata, bool isUnl
 
             int co = i + 1;
             size_t mult = 2 * pow(2, i);
-            sprintf(textshow, "up %d unlocked buy %02d multiplier for %lld", co, mult, 50 * (size_t)pow(userdata->multiplier, i+1));
+            if (i < 2)
+            {
+                sprintf(textshow, "up %d unlocked buy %02d multiplier for %lld", co, mult, 50 * (size_t)pow(userdata->multiplier, i + 1));
+            }
+            if(i>=2){
+                sprintf(textshow, "up %d unlocked buy %02d multiplier and add tries for %lld", co, mult, 50 * (size_t)pow(userdata->multiplier, i + 1));
+            }
             text_surface = TTF_RenderText_Blended(font18, textshow, color);
             text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
-            text_rect.x = (800 - text_surface->w) / 4 + 70;
+            text_rect.x = (800 - text_surface->w) / 4 + 50;
             text_rect.y = y;
             text_rect.w = text_surface->w;
             text_rect.h = text_surface->h;
