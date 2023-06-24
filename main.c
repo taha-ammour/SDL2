@@ -593,7 +593,10 @@ int main(int argc, char *argv[])
                         {
                             mpz_sub_ui(userData.score, userData.score, 50 * pow(userData.multiplier, 3));
                             userData.multiplier += 8;
-                            userData.diffadd ++;
+                            if(userData.difadd < 5){
+                                userData.diffadd++;
+                            }
+                            
                         }
                     }
                     else if (MouseX >= 720 && MouseX <= 790 && MouseY >= 338 && MouseY <= 400 && isUnlocked[3])
@@ -602,7 +605,12 @@ int main(int argc, char *argv[])
                         {
                             mpz_sub_ui(userData.score, userData.score, 50 * pow(userData.multiplier, 4));
                             userData.multiplier += 16;
-                            userData.diffadd += 2;
+                            if (userData.difadd < 5)
+                            {
+                                userData.diffadd += 2;
+                            }
+                            
+                            
                         }
                     }
                     else if (MouseX >= 720 && MouseX <= 790 && MouseY >= 423 && MouseY <= 486 && isUnlocked[4])
@@ -611,7 +619,11 @@ int main(int argc, char *argv[])
                         {
                             mpz_sub_ui(userData.score, userData.score, 50 * pow(userData.multiplier, 5));
                             userData.multiplier += 32;
-                            userData.diffadd += 3;
+                            if (userData.diffadd < 5)
+                            {
+                                userData.diffadd += 3;
+                            }
+                            
                         }
                     }
 
