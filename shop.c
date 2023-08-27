@@ -2,13 +2,12 @@
 #include "file/shop.h"
 #include <math.h>
 
-char *formatNumberWithSuffix(mpz_t number)
-{
+char *formatNumberWithSuffix(mpz_t number) {
     mpz_t base;
     mpz_init(base);
     mpz_set_ui(base, 1000);
 
-    char *suffixes[] = {"", "k", "M", "B", "T"};
+    char *suffixes[] = {"", "k", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "De", "Un", "Du", "Tr", "Qua", "Qui", "Sx", "Sp", "Oc", "No", "Vi", "Dv", "Tg", "Qd", "QiD", "Se", "St", "Og", "Nn", "Ic"};
     int suffixIndex = 0;
 
     mpz_t quotient, remainder;
@@ -16,8 +15,7 @@ char *formatNumberWithSuffix(mpz_t number)
     mpz_init(remainder);
 
     mpz_tdiv_qr(quotient, remainder, number, base);
-    while (mpz_cmp_ui(quotient, 0) >= 1 && suffixIndex < sizeof(suffixes) / sizeof(suffixes[0]) - 1)
-    {
+    while (mpz_cmp_ui(quotient, 0) >= 1 && suffixIndex < sizeof(suffixes) / sizeof(suffixes[0]) - 1) {
         mpz_tdiv_qr(quotient, remainder, quotient, base);
         suffixIndex++;
     }
@@ -26,17 +24,19 @@ char *formatNumberWithSuffix(mpz_t number)
     mpz_get_str(numberString, 10, number);
     size_t length = strlen(numberString);
 
-    size_t bufferSize = BUFFER_SIZE;
+    size_t bufferSize = length + 4; // Length + space for '.' and suffix
+    if (suffixIndex > 0) {
+        bufferSize += 2; // Space for decimal point and suffix
+    }
+
     char *formattedNumber = (char *)malloc(bufferSize * sizeof(char));
-    if (formattedNumber == NULL)
-    {
+    if (formattedNumber == NULL) {
         // Handle memory allocation failure
         mpz_clears(base, quotient, remainder, NULL);
         return NULL;
     }
 
-    if (suffixIndex > 0)
-    {
+    if (suffixIndex > 0) {
         int decimalIndex = length % 3;
         if (decimalIndex == 0)
             decimalIndex = 3;
@@ -44,15 +44,10 @@ char *formatNumberWithSuffix(mpz_t number)
         memmove(numberString + decimalIndex + 1, numberString + decimalIndex, length - decimalIndex + 1);
         numberString[decimalIndex] = '.';
 
-        size_t suffixLength = strlen(suffixes[suffixIndex]);
-        if (length + suffixLength + 4 < BUFFER_SIZE)
-        { // Increase buffer size to accommodate the decimal places and suffix
-            snprintf(numberString + length + 1, 4, "%.2s", suffixes[suffixIndex]);
-        }
+        snprintf(formattedNumber, bufferSize, "%.6s%.3s", numberString, suffixes[suffixIndex]);
+    } else {
+        snprintf(formattedNumber, bufferSize, "%s", numberString);
     }
-
-    strncpy(formattedNumber, numberString, bufferSize - 1);
-    formattedNumber[bufferSize - 1] = '\0';
 
     mpz_clears(base, quotient, remainder, NULL);
     return formattedNumber;
@@ -150,8 +145,6 @@ void drawshop(SDL_Renderer *renderer, TTF_Font *font, Data *userdata, bool isUnl
 
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
-    char *scoreStr;
-    gmp_asprintf(&scoreStr, "score: %Zd", userdata->score);
 
     char *result = formatNumberWithSuffix(userdata->score);
 

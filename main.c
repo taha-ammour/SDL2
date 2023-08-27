@@ -356,7 +356,6 @@ int main(int argc, char *argv[])
                         if (counter <= 0 || incorrect_guesses >= diffinco)
                         {
                             mpz_add_ui(userData.score, userData.score, score);
-                            updateUserData(username, &userData);
                             set = MAIN_MENU;
                             initialized = false;
                             incorrect_guesses = 0;
@@ -560,7 +559,6 @@ int main(int argc, char *argv[])
                     {
                     case SDLK_r:
                         set = MAIN_MENU;
-                        updateUserData(username, &userData);
 
                         break;
                     }
@@ -747,6 +745,9 @@ int main(int argc, char *argv[])
 
         SDL_RenderPresent(renderer);
     }
+    
+    updateUserData(username, &userData);
+    
     // Clean up and exit
     SDL_DestroyTexture(startexture);
     SDL_RemoveTimer(timer_id);
