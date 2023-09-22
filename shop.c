@@ -40,11 +40,11 @@ char *formatNumberWithSuffix(mpz_t number) {
         int decimalIndex = length % 3;
         if (decimalIndex == 0)
             decimalIndex = 3;
-
+        int deci_aft_p = (decimalIndex == 3 )? decimalIndex : 4;
         memmove(numberString + decimalIndex + 1, numberString + decimalIndex, length - decimalIndex + 1);
         numberString[decimalIndex] = '.';
 
-        snprintf(formattedNumber, bufferSize, "%.6s%.3s", numberString, suffixes[suffixIndex]);
+        snprintf(formattedNumber, bufferSize, "%.*s%s", deci_aft_p,numberString, suffixes[suffixIndex]);
     } else {
         snprintf(formattedNumber, bufferSize, "%s", numberString);
     }
